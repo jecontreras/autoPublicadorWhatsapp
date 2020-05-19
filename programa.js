@@ -145,7 +145,7 @@
 const puppeteer = require('puppeteer');
 let countRequest = 0;
 (async () => {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto('https://web.whatsapp.com/send?phone=573156027551&text=Hola&source&data&app_absent');
   page.on('request', request => { countRequest++;  /*console.info(`👉 Request: ${request.url()}`)*/ });
