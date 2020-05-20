@@ -10,6 +10,7 @@
     "nodemon": "^2.0.4",
     "puppeteer": "^3.0.4",
     "puppeteer-core": "^3.0.4",
+    "request": "^2.88.2",
     "selenium-webdriver": "^4.0.0-alpha.7"
   },
   "devDependencies": {},

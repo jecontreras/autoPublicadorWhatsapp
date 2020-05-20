@@ -1,192 +1,160 @@
-// const chromium = require('chromium');
-// const { execFile } = require('child_process');
-// const fs = require('fs');
-// const webdriver = require('selenium-webdriver');
-// const chrome = require('selenium-webdriver/chrome');
-// require('chromedriver');
-
-//  execFile(chromium.path, ['https://web.whatsapp.com/send?phone=573148487506&text=Hola&source&data&app_absent'], err => {
-//      console.log('Hello Google!');
-//  });
-
-// async function init() {
-//   let options = new chrome.Options();
-//   options.setChromeBinaryPath(chromium.path);
-//   options.addArguments('--headless');
-//   options.addArguments('--disable-gpu');
-//   options.addArguments('--window-size=1280,960');
-
-//   const driver = await new webdriver.Builder()
-//     .forBrowser('chrome')
-//     .setChromeOptions(options)
-//     .build();
-
-//   await driver.get('http://google.com');
-//   console.log('Hello Google!');
-
-//   await driver.quit();
-// }
-
-// init();
-
-//  const puppeteer = require('puppeteer');
-
-//  (async () => {
-//    const browser = await puppeteer.launch({ headless: false });
-//    const page = await browser.newPage();
-
-//     //Emulates an iPhone X
-//     // await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1');
-//     // await page.setViewport({ width: 375, height: 812 });
-
-//    await page.goto('https://web.whatsapp.com/');
-
-//     // await browser.close();
-//  })();
-
-
-// const puppeteer = require('puppeteer');
-
-// (async () => {
-//     const browser = await puppeteer.launch({ headless: false });
-//   const page = await browser.newPage();
-
-//   // Emitted when the DOM is parsed and ready (without waiting for resources)
-// //   page.once('domcontentloaded', () => console.info('✅ DOM is ready'));
-
-// //   // Emitted when the page is fully loaded
-// //   page.once('load', () => console.info('✅ Page is loaded'));
-
-// //   // Emitted when the page attaches a frame
-// //   page.on('frameattached', () => console.info('✅ Frame is attached'));
-
-// //   // Emitted when a frame within the page is navigated to a new URL
-// //   page.on('framenavigated', () => console.info('👉 Frame is navigated'));
-
-// //   // Emitted when a script within the page uses `console.timeStamp`
-// //   page.on('metrics', data => console.info(`👉 Timestamp added at ${data.metrics.Timestamp}`));
-
-// //   // Emitted when a script within the page uses `console`
-// //   page.on('console', message => console[message.type()](`👉 ${message.text()}`));
-
-// //   // Emitted when the page emits an error event (for example, the page crashes)
-// //   page.on('error', error => console.error(`❌ ${error}`));
-
-// //   // Emitted when a script within the page has uncaught exception
-// //   page.on('pageerror', error => console.error(`❌ ${error}`));
-
-// //   // Emitted when a script within the page uses `alert`, `prompt`, `confirm` or `beforeunload`
-// //   page.on('dialog', async dialog => {
-// //     console.info(`👉 ${dialog.message()}`);
-// //     await dialog.dismiss();
-// //   });
-
-//   // Emitted when a new page, that belongs to the browser context, is opened
-// //   page.on('popup', () => console.info('👉 New page is opened'));
-
-//   // Emitted when the page produces a request
-// //   page.on('request', request => console.info(`👉 Request: ${request.url()}`));
-
-// //   // Emitted when a request, which is produced by the page, fails
-// //   page.on('requestfailed', request => console.info(`❌ Failed request: ${request.url()}`));
-
-// //   // Emitted when a request, which is produced by the page, finishes successfully
-// //   page.on('requestfinished', request => console.info(`👉 Finished request: ${request.url()}`));
-
-// //   // Emitted when a response is received
-// //   page.on('response', response => console.info(`👉 Response: ${response.url()}`));
-
-// //   // Emitted when the page creates a dedicated WebWorker
-// //   page.on('workercreated', worker => console.info(`👉 Worker: ${worker.url()}`));
-
-// //   // Emitted when the page destroys a dedicated WebWorker
-// //   page.on('workerdestroyed', worker => console.info(`👉 Destroyed worker: ${worker.url()}`));
-
-// //   // Emitted when the page detaches a frame
-// //   page.on('framedetached', () => console.info('✅ Frame is detached'));
-
-// //   // Emitted after the page is closed
-// //   page.once('close', () => console.info('✅ Page is closed'));
-
-//   await page.goto('https://web.whatsapp.com/');
-//   //await page.screenshot({ path: 'example.png' });
-//   setTimeout(async()=>{
-//       const SEARCH_SELECTOR = 'input[placeholder=Search]';
-//       await page.click(SEARCH_SELECTOR);
-//   },5000)
-
-//   //await browser.close();
-// })();
-
-
-// const puppeteer = require('puppeteer');
-
-// (async () => {
-//   const browser = await puppeteer.launch({ headless: false });
-//   const page = await browser.newPage();
-
-//   await page.setViewport({ width: 1920, height: 1080 });
-//   await page.goto('https://pptr.dev');
-//   await page.waitForSelector('sidebar-component');
-
-//   // Drags the mouse from a point
-//   await page.mouse.move(0, 0);
-//   await page.mouse.down();
-
-//   // Drops the mouse to another point
-//   await page.mouse.move(100, 100);
-//   await page.mouse.up();
-
-//   await browser.close();
-// })();
-
-
-
 const puppeteer = require('puppeteer');
 let countRequest = 0;
-(async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto('https://web.whatsapp.com/send?phone=573156027551&text=Hola&source&data&app_absent');
-  page.on('request', request => { countRequest++;  /*console.info(`👉 Request: ${request.url()}`)*/ });
+var browser = Object();
+const mime = require('mime'); // npm install mime
+const path = require('path');
+const fs = require('fs');
 
-  let interval = setInterval(()=>{
-    console.log( countRequest );
-    if( 10 > countRequest ) return false;
-    else {
-      nextProceso();
-      clearInterval( interval );
+async function start() {
+  (async () => {
+    await sleep(50000);
+    detenerServer();
+  });
+
+  browser = await puppeteer.launch({ headless: false });
+  //browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto('https://web.whatsapp.com');
+  page.on('request', request => countRequest++);
+  let interval = setInterval(async () => {
+    //if (10 > countRequest) return false;
+    clearInterval(interval);
+    while (true) {
+      console.log("INIT Del Bloque ", new Date().toTimeString())
+      let resultado = await getURL('mensajes/querys', "{\"where\":{\"estado\":0, \"tipoEnvio\": 2, \"estadoActividad\": false },\"sort\":\"createdAt DESC\",\"page\":0,\"limit\":10}", 'POST');
+      if (resultado) {
+        console.log("Cantidad=>>>>", resultado.data.length)
+        for (let row of resultado.data) {
+          let interval2 = setInterval(async () => {
+            console.log("pruebas", countRequest)
+            if (10 > countRequest){
+              await page.screenshot({ path: 'example.png' });
+              SubirImagen(row);
+            }
+          }, 5000);
+          let result = Object();
+          if (!row.emails) resilt = await getPlataformas(row.empresa);
+          else result = await transformarTelefono(row);
+          //console.log("**", result)
+          let JSONARREGLO = [];
+          if (!result) continue;
+          for (let item of result.data) {
+            let formato = Array();
+            if (!row.emails) await Formatiada(item);
+            else formato = item;
+            JSONARREGLO.push(formato);
+          }
+          console.log("**", JSONARREGLO.length)
+          if (Object.keys(JSONARREGLO).length > 0) await nexProceso(JSONARREGLO, row)
+          await getURL('mensajes/' + row.id, "{\"estadoActividad\": true }", 'PUT');
+        }
+      }
+      await sleep(process.env.tiempo || 120);
+      console.log("Fin Del Bloque ", new Date().toTimeString())
     }
-  }, 5000);
-  // other actions...
-  // await browser.close();
-  async function nextProceso(){
-    let arreglo = [
-      { 
-        mensaje: "JOSE"
+  }, 3000);
+}
+
+async function transformarTelefono(item) {
+  let lista = Array();
+  let filtro = item.emails.split(",");
+  for (let row of filtro) lista.push({ celular: row });
+  return { data: lista };
+}
+
+async function sleep(segundos) {
+  return new Promise(resolve => {
+    setTimeout(async () => { resolve(true) }, segundos * 1000)
+  })
+}
+
+async function detenerServer() {
+  process.exit(0)
+}
+
+async function getURL(url, bodys, metodo) {
+  var request = require('request');
+  return new Promise(resolve => {
+    var options = {
+      'method': metodo,
+      'url': `https://socialmarkert.herokuapp.com/${url}`,
+      'headers': {
+        'Connection': 'keep-alive',
+        'Accept': 'application/json, text/plain, */*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36',
+        'Content-Type': ['application/json', 'text/plain'],
+        'Origin': 'https://publihazclick.com',
+        'Sec-Fetch-Site': 'cross-site',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://publihazclick.com/dashboard/home',
+        'Accept-Language': 'es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,und;q=0.6,pl;q=0.5,pt;q=0.4',
+        'Cookie': 'sails.sid=s%3Aw0lxUqMLnAszWfE_sT9v0B1GIfBNmLwW.oR2AkvD7cWXQLism7%2ByQVA0muAkrD6uLlXt26Nl7lwk'
       },
-      { 
-        mensaje: "CONTRERAS"
-      },
-      { 
-        mensaje: "PEÑA"
-      },
-    ]
-    for( let row of arreglo ){
+      body: bodys
+
+    };
+    request(options, function (error, response) {
+      if (error) {
+        detenerServer();
+        resolve(false);
+        throw new Error(error);
+      }
+      //console.log(JSON.parse(response.body));
+      resolve(JSON.parse(response.body));
+    });
+  });
+}
+
+async function getPlataformas(row) {
+  let resultado = await getURL('mensajes/getPlataformas', JSON.stringify({ url: row.urlConfirmacion }), 'POST');
+  return resultado;
+}
+
+async function Formatiada(item) {
+  if (item.lastname) return {
+    name: item.name,
+    lastname: item.lastname,
+    celular: "57" + item.celular
+  };
+  else return {
+    name: item.usu_nombre,
+    lastname: item.usu_apellido,
+    celular: (item.usu_indicativo || 57) + item.usu_telefono
+  }
+}
+
+async function nexProceso(JSONARREGLO, mensaje) {
+  let interval3 = setInterval(async() => {
+    if (10 > countRequest) return false;
+    // other actions...
+    // await browser.close();
+    clearInterval(interval3);
+    for (let row of JSONARREGLO) {
       const page2 = await browser.newPage();
-      await page2.goto(`https://web.whatsapp.com/send?phone=573156027551&text=${ row.mensaje }&source&data&app_absent`);
-      await sleep(8);
+      console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}&source&data&app_absent`);
+      await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}&source&data&app_absent`);
+      await sleep(10);
       await page2.keyboard.press('Enter');
       console.log("FINIX");
       await sleep(2);
       await page2.close();
     }
-  }
-
-  async function sleep(segundos) {
-    return new Promise(resolve => {
-        setTimeout(async () => { resolve(true) }, segundos * 1000)
-    })
+  }, 3000)
 }
 
-})();
+async function SubirImagen(row) {
+  let image_origial = "example.png";
+  // path to the file we passed in
+  const filepath = path.resolve(image_origial);
+  // get the mimetype
+  const filemime = mime.getType(filepath);
+  fs.readFile(filepath, { encoding: 'base64' }, async (err, data) => {
+    if (err) throw err;
+    // console.log(`data:${filemime};base64,${data}`);
+    let url = `data:${filemime};base64,${data}`;
+    await getURL('mensajes/' + row.id, JSON.stringify({ imagenWhat: url }), 'PUT');
+  });
+}
+
+start();
