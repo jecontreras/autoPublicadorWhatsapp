@@ -7,7 +7,7 @@ const fs = require('fs');
 
 async function start() {
   (async () => {
-    await sleep(50000);
+    // await sleep(50000);
     detenerServer();
   });
 
@@ -26,21 +26,22 @@ async function start() {
         console.log("Cantidad=>>>>", resultado.data.length)
         for (let row of resultado.data) {
           let interval2 = setInterval(async () => {
-            console.log("pruebas", countRequest)
+            console.log("mandar foto =>>>>", countRequest)
             if (10 > countRequest){
               await page.screenshot({ path: 'example.png' });
               SubirImagen(row);
             }
           }, 5000);
           let result = Object();
-          if (!row.emails) resilt = await getPlataformas(row.empresa);
+          // result = await getPlataformas(row.empresa);
+          if (!row.emails) result = await getPlataformas(row.empresa);
           else result = await transformarTelefono(row);
-          //console.log("**", result)
+          console.log("**", result)
           let JSONARREGLO = [];
-          if (!result) continue;
+          if (!result || Object.keys(result).length == 0) continue;
           for (let item of result.data) {
             let formato = Array();
-            if (!row.emails) await Formatiada(item);
+            if (!row.emails) formato = await Formatiada(item);
             else formato = item;
             JSONARREGLO.push(formato);
           }
@@ -78,6 +79,7 @@ async function getURL(url, bodys, metodo) {
     var options = {
       'method': metodo,
       'url': `https://socialmarkert.herokuapp.com/${url}`,
+      //'url': `http://localhost:1337/${url}`,
       'headers': {
         'Connection': 'keep-alive',
         'Accept': 'application/json, text/plain, */*',
@@ -100,13 +102,18 @@ async function getURL(url, bodys, metodo) {
         resolve(false);
         throw new Error(error);
       }
-      //console.log(JSON.parse(response.body));
-      resolve(JSON.parse(response.body));
+      try {
+        // console.log(response.body);
+        resolve(JSON.parse(response.body)); 
+      } catch (error) {
+        resolve(false);
+      }
     });
   });
 }
 
 async function getPlataformas(row) {
+  console.log("entre una")
   let resultado = await getURL('mensajes/getPlataformas', JSON.stringify({ url: row.urlConfirmacion }), 'POST');
   return resultado;
 }
@@ -134,7 +141,7 @@ async function nexProceso(JSONARREGLO, mensaje) {
       const page2 = await browser.newPage();
       console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}&source&data&app_absent`);
       await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}&source&data&app_absent`);
-      await sleep(10);
+      await sleep(20);
       await page2.keyboard.press('Enter');
       console.log("FINIX");
       await sleep(2);
