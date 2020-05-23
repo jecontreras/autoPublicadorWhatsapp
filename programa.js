@@ -34,9 +34,9 @@ async function start() {
           }, 5000);
           let result = Object();
           // result = await getPlataformas(row.empresa);
-          if (!row.emails) result = await getPlataformas(row.empresa);
+          if (!row.emails ) result = await getPlataformas(row.empresa);
           else result = await transformarTelefono(row);
-          console.log("**", result)
+          // console.log("**", result)
           let JSONARREGLO = [];
           if (!result || Object.keys(result).length == 0) continue;
           for (let item of result.data) {
@@ -78,8 +78,8 @@ async function getURL(url, bodys, metodo) {
   return new Promise(resolve => {
     var options = {
       'method': metodo,
-      'url': `https://socialmarkert.herokuapp.com/${url}`,
-      //'url': `http://localhost:1337/${url}`,
+      //'url': `https://socialmarkert.herokuapp.com/${url}`,
+      'url': `http://localhost:1337/${url}`,
       'headers': {
         'Connection': 'keep-alive',
         'Accept': 'application/json, text/plain, */*',
@@ -106,6 +106,7 @@ async function getURL(url, bodys, metodo) {
         // console.log(response.body);
         resolve(JSON.parse(response.body)); 
       } catch (error) {
+        console.log(error);
         resolve(false);
       }
     });

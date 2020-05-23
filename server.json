@@ -1,14 +1,14 @@
 {
     "apps": [
       {
-        "name": "4TRACK(PLATAFORMA)",
+        "name": "AUTO PUBLICADOR WHATSAPP",
         "out_file": "logs/spia.log",
         "error_file": "logs/spia.log",
         "script": "./programa.js",
         "env": {       
           "entrada": "http://192.168.88.110:3000/trackear/v1",
           "salida":"http://192.168.88.110:3000/trackear",
-          "tiempo":120
+          "tiempo": 120
         }
       }
     ]
