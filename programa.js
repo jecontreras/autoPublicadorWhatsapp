@@ -6,10 +6,10 @@ const path = require('path');
 const fs = require('fs');
 
 async function start() {
-  (async () => {
+  /*(async () => {
     // await sleep(50000);
     detenerServer();
-  });
+  });*/
 
   browser = await puppeteer.launch({ headless: false });
   //browser = await puppeteer.launch();
@@ -45,7 +45,7 @@ async function start() {
             else formato = item;
             JSONARREGLO.push(formato);
           }
-          console.log("**", JSONARREGLO.length)
+          console.log("cantidad de usuario", JSONARREGLO.length)
           if (Object.keys(JSONARREGLO).length > 0) await nexProceso(JSONARREGLO, row)
           await getURL('mensajes/' + row.id, "{\"estadoActividad\": true }", 'PUT');
         }
@@ -140,8 +140,8 @@ async function nexProceso(JSONARREGLO, mensaje) {
     clearInterval(interval3);
     for (let row of JSONARREGLO) {
       const page2 = await browser.newPage();
-      console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}&source&data&app_absent`);
-      await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}&source&data&app_absent`);
+      console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
+      await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
       await sleep(20);
       await page2.keyboard.press('Enter');
       console.log("FINIX");
