@@ -23,29 +23,31 @@ async function start() {
       console.log("INIT Del Bloque ", new Date().toTimeString())
       let resultado = await getURL('mensajes/querys', "{\"where\":{\"estado\":0, \"tipoEnvio\": 2, \"estadoActividad\": false },\"sort\":\"createdAt DESC\",\"page\":0,\"limit\":10}", 'POST');
       if (resultado) {
-        console.log("Cantidad=>>>>", resultado.data.length)
+        console.log("Cantidad de mensaje whatsapp=>>>>", resultado.data.length)
         for (let row of resultado.data) {
           let interval2 = setInterval(async () => {
-            console.log("mandar foto =>>>>", countRequest)
             if (10 > countRequest){
+              console.log("mandar foto =>>>>", countRequest)
               await page.screenshot({ path: 'example.png' });
               SubirImagen(row);
-            }
+            }else clearInterval( interval2 );
           }, 5000);
           let result = Object();
           // result = await getPlataformas(row.empresa);
-          if (!row.emails ) result = await getPlataformas(row.empresa);
+          if (!row.emails ) result = await getPlataformas( row.empresa, row.id );
           else result = await transformarTelefono(row);
-          // console.log("**", result)
+          // console.log("Cantidad de Usuarios Encontrados", result)
           let JSONARREGLO = [];
           if (!result || Object.keys(result).length == 0) continue;
+          console.log("Cantidad de Usuarios Encontrados", result.data.length)
+          console.log( "Usuarios Enviados", row.cantidadEnviado );
+          if( row.cantidadEnviado ) for(let i = 0; i < row.cantidadEnviado; i++ ) result.data.splice(i, 1);
           for (let item of result.data) {
             let formato = Array();
             if (!row.emails) formato = await Formatiada(item);
             else formato = item;
             JSONARREGLO.push(formato);
           }
-          console.log("cantidad de usuario", JSONARREGLO.length)
           if (Object.keys(JSONARREGLO).length > 0) await nexProceso(JSONARREGLO, row)
           await getURL('mensajes/' + row.id, "{\"estadoActividad\": true }", 'PUT');
         }
@@ -75,6 +77,7 @@ async function detenerServer() {
 
 async function getURL(url, bodys, metodo) {
   var request = require('request');
+  console.log("******************URL", url)
   return new Promise(resolve => {
     var options = {
       'method': metodo,
@@ -113,9 +116,9 @@ async function getURL(url, bodys, metodo) {
   });
 }
 
-async function getPlataformas(row) {
-  console.log("entre una")
-  let resultado = await getURL('mensajes/getPlataformas', JSON.stringify({ url: row.urlConfirmacion }), 'POST');
+async function getPlataformas( row, id = String ) {
+  // console.log("entre una")
+  let resultado = await getURL('mensajes/getPlataformas', JSON.stringify({ url: row.urlConfirmacion, id: id }), 'POST');
   return resultado;
 }
 
@@ -124,31 +127,43 @@ async function Formatiada(item) {
     name: item.name,
     lastname: item.lastname,
     celular: "57" + item.celular
+    //celular: "573228576900"
   };
   else return {
     name: item.usu_nombre,
     lastname: item.usu_apellido,
     celular: (item.usu_indicativo || 57) + item.usu_telefono
+    //celular: "573228576900"
   }
 }
 
 async function nexProceso(JSONARREGLO, mensaje) {
-  let interval3 = setInterval(async() => {
-    if (10 > countRequest) return false;
-    // other actions...
-    // await browser.close();
-    clearInterval(interval3);
-    for (let row of JSONARREGLO) {
-      const page2 = await browser.newPage();
-      console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
-      await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
-      await sleep(20);
-      await page2.keyboard.press('Enter');
-      console.log("FINIX");
-      await sleep(2);
-      await page2.close();
-    }
-  }, 3000)
+  return new Promise(async(resolve)=>{
+    let interval3 = setInterval(async() => {
+      if (10 > countRequest) return false;
+      // other actions...
+      // await browser.close();
+      clearInterval(interval3);
+      let count =  0;
+      for (let row of JSONARREGLO) {
+        try {
+          const page2 = await browser.newPage();
+          console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
+          await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
+          await sleep(20);
+          await page2.keyboard.press('Enter');
+          console.log("FINIX");
+          await sleep(2);
+          await page2.close();
+          count++;
+          await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count }), 'PUT');
+        } catch (error) {
+          continue;
+        }
+      }
+      resolve(true);
+    }, 3000)
+  });
 }
 
 async function SubirImagen(row) {
