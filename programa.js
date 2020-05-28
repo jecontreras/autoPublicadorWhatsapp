@@ -41,7 +41,7 @@ async function start() {
           if (!result || Object.keys(result).length == 0) continue;
           console.log("Cantidad de Usuarios Encontrados", result.data.length)
           console.log( "Usuarios Enviados", row.cantidadEnviado );
-          if( row.cantidadEnviado ) for(let i = 0; i < row.cantidadEnviado; i++ ) result.data.splice(i, 1);
+          //if( row.cantidadEnviado ) for(let i = 0; i < row.cantidadEnviado; i++ ) result.data.splice(i, 1);
           for (let item of result.data) {
             let formato = Array();
             if (!row.emails) formato = await Formatiada(item);
@@ -52,7 +52,7 @@ async function start() {
           await getURL('mensajes/' + row.id, "{\"estadoActividad\": true }", 'PUT');
         }
       }
-      await sleep(process.env.tiempo || 120);
+      await sleep(process.env.tiempo || 50000);
       console.log("Fin Del Bloque ", new Date().toTimeString())
     }
   }, 3000);
@@ -101,7 +101,7 @@ async function getURL(url, bodys, metodo) {
     };
     request(options, function (error, response) {
       if (error) {
-        detenerServer();
+        //detenerServer();
         resolve(false);
         throw new Error(error);
       }
@@ -144,7 +144,7 @@ async function nexProceso(JSONARREGLO, mensaje) {
       // other actions...
       // await browser.close();
       clearInterval(interval3);
-      let count =  0;
+      let count = mensaje.cantidadEnviado || 0;
       for (let row of JSONARREGLO) {
         try {
           const page2 = await browser.newPage();
@@ -156,7 +156,8 @@ async function nexProceso(JSONARREGLO, mensaje) {
           await sleep(2);
           await page2.close();
           count++;
-          await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count }), 'PUT');
+          let numerosQuedan = await eliminarNumero( JSONARREGLO, row.celular );
+          await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count, emails:numerosQuedan }), 'PUT');
         } catch (error) {
           continue;
         }
@@ -164,6 +165,18 @@ async function nexProceso(JSONARREGLO, mensaje) {
       resolve(true);
     }, 3000)
   });
+}
+
+async function eliminarNumero(JSONARREGLO, celular){
+  let result = Object();
+  let obj = "";
+  let formatiando = [];
+
+  result = JSONARREGLO.filter( row => row.celular != celular );
+  for( let row of result ) formatiando.push( row.celular );
+  if( Object.keys(formatiando).length > 0 ) obj = formatiando.join();
+  console.log("Que hizo obj");
+  return obj;
 }
 
 async function SubirImagen(row) {
