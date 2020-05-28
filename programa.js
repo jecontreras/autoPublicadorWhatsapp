@@ -175,7 +175,6 @@ async function eliminarNumero(JSONARREGLO, celular){
   result = JSONARREGLO.filter( row => row.celular != celular );
   for( let row of result ) formatiando.push( row.celular );
   if( Object.keys(formatiando).length > 0 ) obj = formatiando.join();
-  console.log("Que hizo obj");
   return obj;
 }
 
