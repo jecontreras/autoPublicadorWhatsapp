@@ -130,7 +130,7 @@ async function Formatiada(item) {
   else return {
     name: item.usu_nombre,
     lastname: item.usu_apellido,
-    //celular: (item.usu_indicativo || 57) + item.usu_telefono
+    celular: (item.usu_indicativo || 57) + item.usu_telefono
     //celular: "573228576900"
   }
 }
