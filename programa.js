@@ -6,10 +6,6 @@ const path = require('path');
 const fs = require('fs');
 
 async function start() {
-  /*(async () => {
-    // await sleep(50000);
-    detenerServer();
-  });*/
 
   browser = await puppeteer.launch({ headless: false });
   //browser = await puppeteer.launch();
@@ -41,7 +37,6 @@ async function start() {
           if (!result || Object.keys(result).length == 0) continue;
           console.log("Cantidad de Usuarios Encontrados", result.data.length)
           console.log( "Usuarios Enviados", row.cantidadEnviado );
-          //if( row.cantidadEnviado ) for(let i = 0; i < row.cantidadEnviado; i++ ) result.data.splice(i, 1);
           for (let item of result.data) {
             let formato = Array();
             if (!row.emails) formato = await Formatiada(item);
@@ -61,7 +56,10 @@ async function start() {
 async function transformarTelefono(item) {
   let lista = Array();
   let filtro = item.emails.split(",");
-  for (let row of filtro) lista.push({ celular: row });
+  for (let row of filtro) {
+    let filtro = lista.find( item => item.celular == row );
+    if(!filtro) lista.push({ celular: row });
+  }
   return { data: lista };
 }
 
@@ -132,7 +130,7 @@ async function Formatiada(item) {
   else return {
     name: item.usu_nombre,
     lastname: item.usu_apellido,
-    celular: (item.usu_indicativo || 57) + item.usu_telefono
+    //celular: (item.usu_indicativo || 57) + item.usu_telefono
     //celular: "573228576900"
   }
 }
@@ -145,18 +143,22 @@ async function nexProceso(JSONARREGLO, mensaje) {
       // await browser.close();
       clearInterval(interval3);
       let count = mensaje.cantidadEnviado || 0;
+      let limit = 0;
       for (let row of JSONARREGLO) {
         try {
+          if( limit >= 200 ) { console.log("Pausado 1 hora"); await sleep(3600); limit = 0; }
+          limit++;
           const page2 = await browser.newPage();
-          console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
+          console.log("count",limit, "url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
           await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
+          //await page2.goto(`https://web.whatsapp.com/send?phone=573228576900&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
           await sleep(20);
           await page2.keyboard.press('Enter');
           console.log("FINIX");
           await sleep(2);
           await page2.close();
           count++;
-          let numerosQuedan = await eliminarNumero( JSONARREGLO, row.celular );
+          //let numerosQuedan = await eliminarNumero( JSONARREGLO, row.celular );
           await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count, emails:numerosQuedan }), 'PUT');
         } catch (error) {
           continue;
