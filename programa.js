@@ -145,10 +145,10 @@ async function nexProceso(JSONARREGLO, mensaje) {
       let count = mensaje.cantidadEnviado || 0;
       let limit = 0;
       for (let row of JSONARREGLO) {
+        if( limit >= 200 ) { console.log("Pausado 1 hora"); await sleep(3600); limit = 0; }
+        limit++;
+        const page2 = await browser.newPage();
         try {
-          if( limit >= 200 ) { console.log("Pausado 1 hora"); await sleep(3600); limit = 0; }
-          limit++;
-          const page2 = await browser.newPage();
           console.log("count",limit, "url-------->>>>>", `https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
           await page2.goto(`https://web.whatsapp.com/send?phone=${row.celular}&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
           //await page2.goto(`https://web.whatsapp.com/send?phone=573228576900&text=${ encodeURIComponent(`Hola ${row.name || ''} ${mensaje.subtitulo} ${mensaje.descripcion}`) }&source&data&app_absent`);
@@ -158,9 +158,10 @@ async function nexProceso(JSONARREGLO, mensaje) {
           await sleep(2);
           await page2.close();
           count++;
-          //let numerosQuedan = await eliminarNumero( JSONARREGLO, row.celular );
+          let numerosQuedan = await eliminarNumero( JSONARREGLO, row.celular );
           await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count, emails:numerosQuedan }), 'PUT');
         } catch (error) {
+          await page2.close();
           continue;
         }
       }
