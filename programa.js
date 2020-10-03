@@ -13,7 +13,12 @@ async function Inicial(){
     Procedures.levantandoNavegador();
     await Procedures.sleep( 10 );
     while( true ){
-        resultado = await Procedures.getMensajes();
+        try {
+            resultado = await Procedures.getMensajes( 2 );
+        } catch (error) {
+            await Procedures.sleep( 120 );
+            continue;
+        }
         console.log("Cantidad de mensaje whatsapp=>>>>", resultado.length);
         for( let row of resultado ){
             await Procedures.enviarFoto( row );
@@ -86,6 +91,7 @@ Procedures.enviarWhatsapp = async( dataUser, dataMensaje, msx )=>{
         await Procedures.sleep( dataMensaje.cantidadTiempoMensaje || 15 );
         await page2.keyboard.press('Enter'); 
         console.log("FINIX Enviado");
+        await Procedures.sleep( 5 );
         await page2.close();
         return true;
     } catch (error) {
@@ -120,13 +126,17 @@ Procedures.getPlataformas = async ( row, id = String, cantidadLista = 1 )=>{
 }
 
 Procedures.enviarFoto = async( row )=>{
-    let interval2 = setInterval(async () => {
-    if (10 > countRequest){
-        console.log("mandar foto =>>>>", countRequest)
-        await page.screenshot({ path: 'example.png' });
-        Procedures.SubirImagen(row);
-    }else clearInterval( interval2 );
-    }, 5000);
+    try {
+        let interval2 = setInterval(async () => {
+            if (10 > countRequest){
+                console.log("mandar foto =>>>>", countRequest)
+                await page.screenshot({ path: 'example.png' });
+                Procedures.SubirImagen(row);
+            }else clearInterval( interval2 );
+            }, 5000);   
+    } catch (error) {
+        console.error(">>>>>>>>>>>>>>>>>>>>***tenemos Problemas mandar la foto***<<<<<<<<<<<<<<<<<<<<<<")
+    }
 }
 
 Procedures.SubirImagen = async ( row )=>{
@@ -152,9 +162,9 @@ Procedures.levantandoNavegador = async()=>{
     return page;
 }
 
-Procedures.getMensajes = async ()=>{
+Procedures.getMensajes = async ( id )=>{
     let resultado = Array();
-    resultado = await getURL('mensajes/querys', "{\"where\":{\"estado\":0, \"tipoEnvio\": 2, \"estadoActividad\": false },\"sort\":\"createdAt DESC\",\"page\":0,\"limit\":10}", 'POST');
+    resultado = await getURL('mensajes/querys', `{\"where\":{\"estado\":0, \"idPuesto\":${ id }, \"tipoEnvio\": 2, \"estadoActividad\": false },\"sort\":\"createdAt DESC\",\"page\":0,\"limit\":10}`, 'POST');
     if( !resultado ) return [];
     else return resultado.data;
 }
@@ -178,8 +188,8 @@ async function getURL(url, bodys, metodo) {
     return new Promise(resolve => {
       var options = {
         'method': metodo,
-        // 'url': `https://socialmarkert.herokuapp.com/${url}`,
-        'url': `http://localhost:1337/${url}`,
+        'url': `https://socialmarkert.herokuapp.com/${url}`,
+        //'url': `http://localhost:1337/${url}`,
         'headers': {
           'Connection': 'keep-alive',
           'Accept': 'application/json, text/plain, */*',
