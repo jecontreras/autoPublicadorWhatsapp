@@ -14,7 +14,7 @@ async function Inicial(){
     await Procedures.sleep( 10 );
     while( true ){
         try {
-            resultado = await Procedures.getMensajes( 2 );
+            resultado = await Procedures.getMensajes( 1 );
         } catch (error) {
             await Procedures.sleep( 120 );
             continue;
@@ -188,8 +188,8 @@ async function getURL(url, bodys, metodo) {
     return new Promise(resolve => {
       var options = {
         'method': metodo,
-        'url': `https://socialmarkert.herokuapp.com/${url}`,
-        //'url': `http://localhost:1337/${url}`,
+        //'url': `https://socialmarketings.herokuapp.com/${url}`,
+        'url': `http://localhost:1337/${url}`,
         'headers': {
           'Connection': 'keep-alive',
           'Accept': 'application/json, text/plain, */*',
