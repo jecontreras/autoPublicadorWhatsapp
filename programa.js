@@ -189,7 +189,7 @@ async function getURL(url, bodys, metodo) {
       var options = {
         'method': metodo,
         'url': `https://socialmarketings.herokuapp.com/${url}`,
-        //'url': `http://localhost:1337/${url}`,
+        //'url': `http://localhost:1138/${url}`,
         'headers': {
           'Connection': 'keep-alive',
           'Accept': 'application/json, text/plain, */*',
