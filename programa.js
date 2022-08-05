@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 let Procedures = Object();
 let page;
+let ipPc = 5;
 
 async function Inicial(){
     let resultado = Array();
@@ -14,7 +15,7 @@ async function Inicial(){
     await Procedures.sleep( 10 );
     while( true ){
         try {
-            resultado = await Procedures.getMensajes( 1 );
+            resultado = await Procedures.getMensajes( ipPc );
         } catch (error) {
             await Procedures.sleep( 120 );
             continue;
@@ -176,7 +177,24 @@ Procedures.sleep = async( minutos )=>{
 }
 
 
-Inicial();
+//Inicial();}
+
+
+async function run(){
+    const browser = await puppeteer.launch({headless:false})
+    const page = await browser.newPage()
+    await page.goto('https://web.whatsapp.com')
+    await Procedures.sleep( 60 );
+    const page2 = await browser.newPage();
+    await page2.goto(`https://web.whatsapp.com/send?phone=573156027551&text=Hola&source&data&app_absent`);
+    await Procedures.sleep( 10 );
+    const [fileChooser] = await Promise.all([
+        page2.waitForFileChooser(),
+        page2.click("[name='upload']"),
+      ]);
+    await fileChooser.accept(['C:/Users/57315/Downloads/camion.png']);
+}
+run()
 
 
 
