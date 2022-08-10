@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 let Procedures = Object();
 let page;
-let ipPc = 5;
+let ipPc = 1;
 // Path where the session data will be stored
 /*const SESSION_FILE_PATH = './session.json';
 
@@ -91,8 +91,8 @@ async function Inicial() {
                     let validandoPause = await Procedures.validandoPausa(result.mensaje);
                     let msx = await Procedures.validandoRotador(result.mensaje, countRotador);
                     let process = await Procedures.enviarWhatsapp(key, result.mensaje, msx);
-                    process = await Procedures.validandoMsxEnviados(item, key);
-                    process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
+                    //process = await Procedures.validandoMsxEnviados(item, key);
+                    //process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
                     countMsx++;
                 }
                 console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
@@ -158,7 +158,7 @@ Procedures.enviarWhatsapp = async( dataUser, dataMensaje, msx )=>{
     try {
         console.log( "454546", dataUser, dataMensaje, msx)
         console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=57${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx.text }`) }&source&data&app_absent`);
-        envioWhatsapp( client, dataUser.telefono, msx, );
+        envioWhatsapp( client, dataUser.telefono, msx,dataMensaje );
         await Procedures.sleep( 10 );
         console.log("FINIX Enviado");
         return true;
@@ -229,8 +229,8 @@ Procedures.sleep = async (minutos) => {
     });
 }
 
-async function envioWhatsapp( client, number, msx ) {
-    console.log('Client is ready!');
+async function envioWhatsapp( client, number, msx, dataMensaje ) {
+    console.log('Client is ready!', dataMensaje );
 
     // Number where you want to send the message.
     //const number = "+573156027551";
@@ -242,11 +242,16 @@ async function envioWhatsapp( client, number, msx ) {
     // Getting chatId from the number.
     // we have to delete "+" from the beginning and add "@c.us" at the end of the number.
     const chatId = number.substring(1) + "@c.us";
-    for( let row of listImg ){
-        const media = await MessageMedia.fromUrl( row.foto );
-        await client.sendMessage(chatId, media);
-
+    if( dataMensaje.listRotador[0] ){
+        for( let row of dataMensaje.listRotador ){
+            for( let key of row.galeriaList ){
+                const media = await MessageMedia.fromUrl( key.foto );
+                await client.sendMessage(chatId, media);
+            }
+            await client.sendMessage(chatId, row.mensajes );
+        }
+    }else{
+        // Sending message.
+        client.sendMessage(chatId, text);
     }
-    // Sending message.
-    client.sendMessage(chatId, text);
 }
