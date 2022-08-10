@@ -91,8 +91,8 @@ async function Inicial() {
                     let validandoPause = await Procedures.validandoPausa(result.mensaje);
                     let msx = await Procedures.validandoRotador(result.mensaje, countRotador);
                     let process = await Procedures.enviarWhatsapp(key, result.mensaje, msx);
-                    //process = await Procedures.validandoMsxEnviados(item, key);
-                    //process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
+                    process = await Procedures.validandoMsxEnviados(item, key);
+                    process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
                     countMsx++;
                 }
                 console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
