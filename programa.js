@@ -8,10 +8,9 @@ const path = require('path');
 const fs = require('fs');
 let Procedures = Object();
 let page;
-let ipPc = 1;
+let ipPc = 2;
 // Path where the session data will be stored
 /*const SESSION_FILE_PATH = './session.json';
-
 // Load the session data if it has been previously saved
 let sessionData;
 if(fs.existsSync(SESSION_FILE_PATH)) {
@@ -27,8 +26,8 @@ const client = new Client({
       clientId: "client-one"
     }),*/
     puppeteer: {
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        headless: false,
+        //args: ['--no-sandbox']
     }
 });
 
@@ -159,7 +158,7 @@ Procedures.enviarWhatsapp = async( dataUser, dataMensaje, msx )=>{
     try {
         console.log( "454546", dataUser, dataMensaje, msx)
         console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=57${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx.text }`) }&source&data&app_absent`);
-        envioWhatsapp( client, dataUser.telefono, msx,dataMensaje );
+        await envioWhatsapp( client, dataUser.telefono, msx,dataMensaje );
         await Procedures.sleep( 10 );
         console.log("FINIX Enviado");
         return true;
@@ -231,28 +230,36 @@ Procedures.sleep = async (minutos) => {
 }
 
 async function envioWhatsapp( client, number, msx, dataMensaje ) {
-    console.log('Client is ready!', dataMensaje );
+    return new Promise( async ( resolve )=>{
+        try {
+        console.log('Client is ready!', dataMensaje );
 
-    // Number where you want to send the message.
-    //const number = "+573156027551";
-    number = "+" + number;
-    // Your message.
-    const text = msx.text || "Hola jose";
-    let listImg = msx.files;
-    if( !msx.files ) listImg = [];
-    // Getting chatId from the number.
-    // we have to delete "+" from the beginning and add "@c.us" at the end of the number.
-    const chatId = number.substring(1) + "@c.us";
-    if( dataMensaje.listRotador[0] ){
-        for( let row of dataMensaje.listRotador ){
-            for( let key of row.galeriaList ){
-                const media = await MessageMedia.fromUrl( key.foto );
-                await client.sendMessage(chatId, media);
+        // Number where you want to send the message.
+        //const number = "+573156027551";
+        number = "+57" + number;
+        // Your message.
+        const text = msx.text || "Hola jose";
+        let listImg = msx.files;
+        if( !msx.files ) listImg = [];
+        // Getting chatId from the number.
+        // we have to delete "+" from the beginning and add "@c.us" at the end of the number.
+        const chatId = number.substring(1) + "@c.us";
+        if( dataMensaje.listRotador[0] ){
+            for( let row of dataMensaje.listRotador ){
+                if( !row.galeriaList ) row.galeriaList = [];
+                for( let key of row.galeriaList ){
+                    const media = await MessageMedia.fromUrl( key.foto );
+                    await client.sendMessage(chatId, media);
+                }
+                await client.sendMessage(chatId, row.mensajes );
             }
-            await client.sendMessage(chatId, row.mensajes );
+        }else{
+            // Sending message.
+           await client.sendMessage(chatId, text);
         }
-    }else{
-        // Sending message.
-        client.sendMessage(chatId, text);
-    }
+            resolve( true );
+        }catch(error){ resolve( false ); }
+    });
+    
+    
 }
