@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 let Procedures = Object();
 let page;
-let ipPc = 5;
+let ipPc = 4;
 // Path where the session data will be stored
 /*const SESSION_FILE_PATH = './session.json';
 // Load the session data if it has been previously saved
