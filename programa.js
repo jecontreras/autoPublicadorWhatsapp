@@ -9,26 +9,27 @@ const fs = require('fs');
 let Procedures = Object();
 let page;
 let ipPc = 4;
+let qrIP = String();
 
 // Path where the session data will be stored
-/*const SESSION_FILE_PATH = './session.json';
+const SESSION_FILE_PATH = './session.json';
 // Load the session data if it has been previously saved
 let sessionData;
 if(fs.existsSync(SESSION_FILE_PATH)) {
     sessionData = require(SESSION_FILE_PATH);
-}*/
+}
 
 // Use the saved values
 const client = new Client({
     puppeteer: {
         executablePath: '/usr/bin/brave-browser-stable',
     },
-    /*authStrategy: new LocalAuth({
+    authStrategy: new LocalAuth({
       clientId: "client-one"
-    }),*/
+    }),
     puppeteer: {
         headless: false,
-        //args: ['--no-sandbox']
+        args: ['--no-sandbox']
     }
 });
 
@@ -45,6 +46,8 @@ client.on('authenticated', (session) => {
 });
 client.on('qr', (qr) => {
     console.log('QR RECEIVED', qr);
+    qrIP = qr;
+    //SubirImagen(row)
     qrcode.generate(qr, { small: true });
 });
 
@@ -265,3 +268,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
     
     
 }
+
+async function SubirImagen(row) {
+    await getURL('mensajes/' + row.id, JSON.stringify({ imagenWhat: url }), 'PUT');
+  }
