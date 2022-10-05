@@ -150,14 +150,14 @@ Procedures.validandoRotador = async( mensaje , index )=>{
     if( Object.keys( mensaje.listRotador ).length ===  0 ) return mensaje.descripcion;
     else {
         if( !mensaje.listRotador[index] ) { index = 0; return { text: mensaje.listRotador[index].mensajes, files: mensaje.listRotador[index].galeriaList }; }
-        else return { text: mensaje.listRotador[index].mensajes, files: mensaje.listRotador[index].galeriaList };
+        else return { text: mensaje.listRotador[index].mensaje, files: mensaje.listRotador[index].galeriaList };
     }
 }
 
 Procedures.enviarWhatsapp = async( dataUser, dataMensaje, msx )=>{
     try {
         console.log( "454546", dataUser, dataMensaje, msx)
-        console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=57${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx.text }`) }&source&data&app_absent`);
+        //console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx.text }`) }&source&data&app_absent`);
         await envioWhatsapp( client, dataUser.telefono, msx,dataMensaje );
         await Procedures.sleep( 10 );
         console.log("FINIX Enviado");
@@ -236,13 +236,14 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
 
         // Number where you want to send the message.
         //const number = "+573156027551";
-        number = "+57" + number;
+        number = "+" + number;
         // Your message.
         const text = msx.text || "Hola jose";
         let listImg = msx.files;
         if( !msx.files ) listImg = [];
         // Getting chatId from the number.
         // we have to delete "+" from the beginning and add "@c.us" at the end of the number.
+        console.log("DATA ENVIA", number, "TEXTO ENVIA", msx)
         const chatId = number.substring(1) + "@c.us";
         if( dataMensaje.listRotador[0] ){
             for( let row of dataMensaje.listRotador ){
@@ -251,7 +252,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
                     const media = await MessageMedia.fromUrl( key.foto );
                     await client.sendMessage(chatId, media);
                 }
-                await client.sendMessage(chatId, row.mensajes );
+                await client.sendMessage(chatId, row.mensaje );
             }
         }else{
             // Sending message.
