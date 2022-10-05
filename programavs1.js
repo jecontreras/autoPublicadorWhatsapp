@@ -9,7 +9,6 @@ const fs = require('fs');
 let Procedures = Object();
 let page;
 let ipPc = 4;
-
 // Path where the session data will be stored
 /*const SESSION_FILE_PATH = './session.json';
 // Load the session data if it has been previously saved
@@ -92,8 +91,8 @@ async function Inicial() {
                     let validandoPause = await Procedures.validandoPausa(result.mensaje);
                     let msx = await Procedures.validandoRotador(result.mensaje, countRotador);
                     let process = await Procedures.enviarWhatsapp(key, result.mensaje, msx);
-                    process = await Procedures.validandoMsxEnviados(item, key);
-                    process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
+                    //process = await Procedures.validandoMsxEnviados(item, key);
+                    //process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
                     countMsx++;
                 }
                 console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
