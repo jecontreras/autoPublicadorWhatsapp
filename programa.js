@@ -9,25 +9,35 @@ const fs = require('fs');
 let Procedures = Object();
 let page;
 let ipPc = 10;
+<<<<<<< HEAD
+=======
+let qrIP = String();
+
+>>>>>>> 3cb7472e34bfb6f4c8e49060711db03eca0f71f3
 // Path where the session data will be stored
-/*const SESSION_FILE_PATH = './session.json';
+const SESSION_FILE_PATH = './session.json';
 // Load the session data if it has been previously saved
 let sessionData;
 if(fs.existsSync(SESSION_FILE_PATH)) {
     sessionData = require(SESSION_FILE_PATH);
-}*/
+}
 
 // Use the saved values
 const client = new Client({
     puppeteer: {
         executablePath: '/usr/bin/brave-browser-stable',
     },
-    /*authStrategy: new LocalAuth({
+    authStrategy: new LocalAuth({
       clientId: "client-one"
-    }),*/
+    }),
     puppeteer: {
+<<<<<<< HEAD
         headless: true,
         //args: ['--no-sandbox']
+=======
+        headless: false,
+        args: ['--no-sandbox']
+>>>>>>> 3cb7472e34bfb6f4c8e49060711db03eca0f71f3
     }
 });
 
@@ -42,15 +52,6 @@ client.on('authenticated', (session) => {
         }
     })*/
 });
-client.on('qr', (qr) => {
-    console.log('QR RECEIVED', qr);
-    qrcode.generate(qr, { small: true });
-});
-
-client.on("ready", async () => {
-    console.log("WHATSAPP WEB => Ready");
-    Inicial();
-});
 
 client.on('message', async (message) => {
     //console.log("****", message )
@@ -61,7 +62,6 @@ client.on('message', async (message) => {
         chat.sendMessage(media);
     }*/
 });
-
 async function Inicial() {
     let resultado = Array();
     console.log("INIT Del Bloque ", new Date().toTimeString())
@@ -75,33 +75,61 @@ async function Inicial() {
         }
         console.log("Cantidad de mensaje whatsapp=>>>>", resultado.length);
         for (let row of resultado) {
-            //await Procedures.enviarFoto(row);
-            let result = Object();
-            result = await Procedures.getPlataformas(row.empresa, row.id, row.cantidadLista);
-            console.log( "45645645445464",result );
-            for (let item of result.listaMensaje) {
-                let countRotador = 0;
-                let countMsx = 0;
-                let count = 0;
-                for (let key of item.numerosPendientes) {
-                    count++;
-                    if (!result.mensaje) { console.error("Tenemos problemas con el get del mensaje"); break; }
-                    //if (countMsx >= result.mensaje.cantidadMsxPausa) { countMsx = 0; await Procedures.sleep(result.mensaje.tiempoMsxPausa || 30); }
-                    console.log("lenght a enviar ", item.numerosPendientes.length);
-                    let validandoPause = await Procedures.validandoPausa(result.mensaje);
-                    let msx = await Procedures.validandoRotador(result.mensaje, countRotador);
-                    let process = await Procedures.enviarWhatsapp(key, result.mensaje, msx);
-                    process = await Procedures.validandoMsxEnviados(item, key);
-                    process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
-                    countMsx++;
-                }
-                console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
-            }
+            await ProcesoQR( row );
+            await ProcesoEn( row);
             console.log(">>>>>>>>>>>>>>>>>>**Lista de todos los numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
         }
         console.log(">>>>>>>>>>>>>>>>>>**Msx de watsapp completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
         await Procedures.sleep(180);
     }
+}
+
+async function ProcesoQR( row){
+    return new Promise( resolve =>{
+        client.on('qr', (qr) => {
+            console.log('QR RECEIVED', qr);
+            qrIP = qr;
+            row.url = qr;
+            qrcode.generate(qr, { small: true });
+            SubirImagen( row );
+            resolve( true );
+        });
+    })
+}
+
+async function ProcesoEn( row ){
+    return new Promise( resolve =>{
+        client.on("ready", async () => {
+            console.log("WHATSAPP WEB => Ready");
+            //await Procedures.enviarFoto(row);
+            let result = Object();
+            result = await Procedures.getPlataformas(row.empresa, row.id, row.cantidadLista);
+            console.log( "45645645445464",result );
+            try {
+                for (let item of result.listaMensaje) {
+                    let countRotador = 0;
+                    let countMsx = 0;
+                    let count = 0;
+                    for (let key of item.numerosPendientes) {
+                        count++;
+                        if (!result.mensaje) { console.error("Tenemos problemas con el get del mensaje"); break; }
+                        if (countMsx >= result.mensaje.cantidadMsxPausa) { countMsx = 0; await Procedures.sleep(result.mensaje.tiempoMsxPausa || 30); }
+                        console.log("lenght a enviar ", item.numerosPendientes.length);
+                        let validandoPause = await Procedures.validandoPausa(result.mensaje);
+                        let msx = await Procedures.validandoRotador(result.mensaje, countRotador);
+                        let process = await Procedures.enviarWhatsapp(key, result.mensaje, msx);
+                        process = await Procedures.validandoMsxEnviados(item, key);
+                        process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
+                        countMsx++;
+                    }
+                    console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                }
+            } catch (error) {
+                resolve( false );
+            }
+            resolve( true );
+        });
+    })
 }
 
 Procedures.getMensajes = async ( id )=>{
@@ -150,16 +178,16 @@ Procedures.validandoRotador = async( mensaje , index )=>{
     if( Object.keys( mensaje.listRotador ).length ===  0 ) return mensaje.descripcion;
     else {
         if( !mensaje.listRotador[index] ) { index = 0; return { text: mensaje.listRotador[index].mensajes, files: mensaje.listRotador[index].galeriaList }; }
-        else return { text: mensaje.listRotador[index].mensajes, files: mensaje.listRotador[index].galeriaList };
+        else return { text: mensaje.listRotador[index].mensaje, files: mensaje.listRotador[index].galeriaList };
     }
 }
 
 Procedures.enviarWhatsapp = async( dataUser, dataMensaje, msx )=>{
     try {
         console.log( "454546", dataUser, dataMensaje, msx)
-        console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=57${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx.text }`) }&source&data&app_absent`);
+        //console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx.text }`) }&source&data&app_absent`);
         await envioWhatsapp( client, dataUser.telefono, msx,dataMensaje );
-        await Procedures.sleep( 10 );
+        await Procedures.sleep( dataMensaje.cantidadTiempoMensaje || 15 );
         console.log("FINIX Enviado");
         return true;
     } catch (error) {
@@ -243,6 +271,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
         if( !msx.files ) listImg = [];
         // Getting chatId from the number.
         // we have to delete "+" from the beginning and add "@c.us" at the end of the number.
+        console.log("DATA ENVIA", number, "TEXTO ENVIA", msx)
         const chatId = number.substring(1) + "@c.us";
         if( dataMensaje.listRotador[0] ){
             for( let row of dataMensaje.listRotador ){
@@ -263,3 +292,9 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
     
     
 }
+
+async function SubirImagen(row) {
+    await getURL('mensajes/' + row.id, JSON.stringify({ imagenWhat: row.url }), 'PUT');
+}
+
+Inicial();
