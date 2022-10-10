@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 let Procedures = Object();
 let page;
-let ipPc = 4;
+let ipPc = 10;
 // Path where the session data will be stored
 /*const SESSION_FILE_PATH = './session.json';
 // Load the session data if it has been previously saved
@@ -26,7 +26,7 @@ const client = new Client({
       clientId: "client-one"
     }),*/
     puppeteer: {
-        headless: false,
+        headless: true,
         //args: ['--no-sandbox']
     }
 });
