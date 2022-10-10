@@ -1,3 +1,2 @@
-2022/10/08-12:34:09.286 d18 Reusing MANIFEST C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Service Worker\Database/MANIFEST-000001
-2022/10/08-12:34:09.286 d18 Recovering log #3
-2022/10/08-12:34:09.286 d18 Reusing old log C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Service Worker\Database/000003.log 
+2022/10/10-13:31:18.688 14ec Creating DB E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Service Worker\Database since it was missing.
+2022/10/10-13:31:18.978 14ec Reusing MANIFEST E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Service Worker\Database/MANIFEST-000001

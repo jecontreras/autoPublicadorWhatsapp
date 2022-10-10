@@ -1,3 +1,2 @@
-2022/10/08-12:34:09.246 2460 Reusing MANIFEST C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Local Storage\leveldb/MANIFEST-000001
-2022/10/08-12:34:09.247 2460 Recovering log #4
-2022/10/08-12:34:09.247 2460 Reusing old log C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Local Storage\leveldb/000004.log 
+2022/10/10-13:31:09.807 1214 Creating DB E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Local Storage\leveldb since it was missing.
+2022/10/10-13:31:10.911 1214 Reusing MANIFEST E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Local Storage\leveldb/MANIFEST-000001

@@ -1,3 +1,2 @@
-2022/10/08-12:34:09.215 2bcc Reusing MANIFEST C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Site Characteristics Database/MANIFEST-000001
-2022/10/08-12:34:09.215 2bcc Recovering log #3
-2022/10/08-12:34:09.216 2bcc Reusing old log C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Site Characteristics Database/000003.log 
+2022/10/10-13:31:08.906 d6c Creating DB E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Site Characteristics Database since it was missing.
+2022/10/10-13:31:09.540 d6c Reusing MANIFEST E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Site Characteristics Database/MANIFEST-000001

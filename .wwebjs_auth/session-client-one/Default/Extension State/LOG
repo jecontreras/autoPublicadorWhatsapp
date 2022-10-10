@@ -1,3 +1,2 @@
-2022/10/08-12:34:09.314 1ff0 Reusing MANIFEST C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Extension State/MANIFEST-000001
-2022/10/08-12:34:09.314 1ff0 Recovering log #3
-2022/10/08-12:34:09.314 1ff0 Reusing old log C:\prs\boot\autoPublicadorWhatsapp\.wwebjs_auth\session-client-one\Default\Extension State/000003.log 
+2022/10/10-13:31:09.542 4554 Creating DB E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Extension State since it was missing.
+2022/10/10-13:31:10.166 4554 Reusing MANIFEST E:\proyectos\boot\autopublicadorWhat\.wwebjs_auth\session-client-one\Default\Extension State/MANIFEST-000001
