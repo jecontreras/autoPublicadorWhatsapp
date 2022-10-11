@@ -9,7 +9,6 @@ const fs = require('fs');
 let Procedures = Object();
 let page;
 let ipPc = 10;
-let qrIP = String();
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -33,11 +32,12 @@ const client = new Client({
     }
 });
 
-client.initialize();
-
+client.initialize(); 
+ProcesoQR( false );
 // Save session values to the file upon successful auth
 client.on('authenticated', (session) => {
     sessionData = session;
+    console.log("*****", session)
     /*fs.writeFile(SESSION_FILE_PATH, JSON.stringify(session), (err) => {
         if (err) {
             console.error(err);
@@ -83,7 +83,7 @@ async function ProcesoQR( row){
             qrIP = qr;
             row.url = qr;
             qrcode.generate(qr, { small: true });
-            SubirImagen( row );
+            if( row ) SubirImagen( row );
             resolve( true );
         });
         await ProcesoReady( row );

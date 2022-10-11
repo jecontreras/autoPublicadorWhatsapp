@@ -26,6 +26,7 @@ npm-debug.log*
 /coverage
 /dist
 /node_modules
+/.wwebjs_auth
 /platforms
 /plugins
 /www
