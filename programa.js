@@ -68,7 +68,6 @@ async function Inicial() {
         console.log("Cantidad de mensaje whatsapp=>>>>", resultado.length);
         for (let row of resultado) {
             await ProcesoQR( row );
-            await ProcesoReady( row);
             console.log(">>>>>>>>>>>>>>>>>>**Lista de todos los numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
         }
         console.log(">>>>>>>>>>>>>>>>>>**Msx de watsapp completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
@@ -100,11 +99,12 @@ async function ProcesoReady( row ){
 
 async function ProcesoEn( row ){
     return new Promise( async( resolve ) =>{
+        console.log("¨¨¨¨", row)
          //await Procedures.enviarFoto(row);
          let result = Object();
-         result = await Procedures.getPlataformas(row.empresa, row.id, row.cantidadLista);
-         console.log( "45645645445464",result );
          try {
+             result = await Procedures.getPlataformas(row.empresa, row.id, row.cantidadLista);
+             console.log( "45645645445464",result );
              for (let item of result.listaMensaje) {
                  let countRotador = 0;
                  let countMsx = 0;
@@ -124,6 +124,7 @@ async function ProcesoEn( row ){
                  console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
              }
          } catch (error) {
+            console.log( "ERRORRRRr",error );
              resolve( false );
          }
          resolve( true );
