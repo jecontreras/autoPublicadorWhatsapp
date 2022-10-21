@@ -259,7 +259,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
            await client.sendMessage(chatId, text);
         }
             resolve( true );
-        }catch(error){ resolve( false ); }
+        }catch(error){ console.log("**********ERROR", error ); resolve( false ); }
     });
     
     

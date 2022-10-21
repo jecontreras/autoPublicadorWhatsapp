@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 let Procedures = Object();
 let page;
-let ipPc = 5;
+let ipPc = 4;
 
 async function Inicial(){
     let resultado = Array();
@@ -88,7 +88,7 @@ Procedures.enviarWhatsapp = async( dataUser, dataMensaje, msx )=>{
     const page2 = await browser.newPage();
     try {
         console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=57${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx }`) }&source&data&app_absent`);
-        await page2.goto(`https://web.whatsapp.com/send?phone=57${ dataUser.telefono }&text=${ encodeURIComponent(`Hola ${ dataUser.username } ${ msx }`) }&source&data&app_absent`);
+        await page2.goto(`https://web.whatsapp.com/send?phone=${ dataUser.telefono }&text=${ encodeURIComponent(`Hola ${ dataUser.username } ${ msx }`) }&source&data&app_absent`);
         await Procedures.sleep( dataMensaje.cantidadTiempoMensaje || 15 );
         await page2.keyboard.press('Enter'); 
         console.log("FINIX Enviado");
@@ -177,7 +177,7 @@ Procedures.sleep = async( minutos )=>{
 }
 
 
-//Inicial();}
+Inicial();
 
 
 async function run(){
@@ -194,7 +194,7 @@ async function run(){
       ]);
     await fileChooser.accept(['C:/Users/57315/Downloads/camion.png']);
 }
-run()
+//run()
 
 
 
