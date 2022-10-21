@@ -6,7 +6,7 @@
   "dependencies": {
     "chrome-launcher": "^0.13.2",
     "chromedriver": "^81.0.0",
-    "chromium": "^2.1.2",
+    "chromium": "^3.0.3",
     "nodemon": "^2.0.4",
     "puppeteer": "^3.0.4",
     "puppeteer-core": "^3.0.4",
