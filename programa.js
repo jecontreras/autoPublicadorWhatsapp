@@ -85,7 +85,7 @@ async function ProcesoQR( row){
             qrcode.generate(qr, { small: true });
             if( row ) SubirImagen( row );
             resolve( true );
-        });
+        },( error)=> resolve( true ) );
     })
 }
 
@@ -120,7 +120,7 @@ async function ProcesoEn( row ){
                 resolve( false );
             }
             resolve( true );
-        });
+        },( error)=> resolve( true ) );
     })
 }
 
