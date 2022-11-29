@@ -99,12 +99,12 @@ async function ProcesoReady( row ){
 
 async function ProcesoEn( row ){
     return new Promise( async( resolve ) =>{
-        console.log("¨¨¨¨", row)
+        //console.log("¨¨¨¨", row)
          //await Procedures.enviarFoto(row);
          let result = Object();
          try {
              result = await Procedures.getPlataformas(row.empresa, row.id, row.cantidadLista);
-             console.log( "45645645445464",result );
+             //console.log( "45645645445464",result );
              for (let item of result.listaMensaje) {
                  let countRotador = 0;
                  let countMsx = 0;
@@ -259,11 +259,10 @@ Procedures.sleep = async (minutos) => {
 async function envioWhatsapp( client, number, msx, dataMensaje ) {
     return new Promise( async ( resolve )=>{
         try {
-        console.log('Client is ready!', dataMensaje );
-
+            
         // Number where you want to send the message.
         //const number = "+573156027551";
-        number = "+58" + number;
+        number = "+" + number;
         // Your message.
         const text = msx.text || "Hola jose";
         let listImg = msx.files;
