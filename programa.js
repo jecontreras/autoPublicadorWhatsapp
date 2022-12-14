@@ -6,9 +6,10 @@ var browser = Object();
 const mime = require('mime'); // npm install mime
 const path = require('path');
 const fs = require('fs');
+const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 4;
+let ipPc = 10;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -27,7 +28,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: false,
+        headless: true,
         args: ['--no-sandbox']
     }
 });
@@ -239,6 +240,7 @@ async function getURL(url, bodys, metodo) {
                 resolve(false);
                 //throw new Error(error);
             }
+            //console.log( response.body)
             try {
                 // console.log(response.body);
                 resolve(JSON.parse(response.body));
