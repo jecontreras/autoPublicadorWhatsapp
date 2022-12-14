@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 let Procedures = Object();
 let page;
-let ipPc = 2;
+let ipPc = 4;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -215,7 +215,7 @@ async function getURL(url, bodys, metodo) {
     return new Promise(resolve => {
         var options = {
             'method': metodo,
-            'url': `https://socialmarketings.herokuapp.com/${url}`,
+            'url': `https://whatsappapiweb.herokuapp.com/${url}`,
             //'url': `http://localhost:1138/${url}`,
             'headers': {
                 'Connection': 'keep-alive',
