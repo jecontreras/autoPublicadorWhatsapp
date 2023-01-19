@@ -264,7 +264,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
             
         // Number where you want to send the message.
         //const number = "+573156027551";
-        number = "+57" + number;
+        number = "+" + number;
         // Your message.
         const text = msx.text || "Hola jose";
         let listImg = msx.files;
@@ -280,7 +280,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
                     const media = await MessageMedia.fromUrl( key.foto );
                     await client.sendMessage(chatId, media);
                 }
-                await client.sendMessage(chatId, row.mensajes );
+                await client.sendMessage(chatId, text );
             }
         }else{
             // Sending message.
