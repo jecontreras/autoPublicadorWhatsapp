@@ -9,7 +9,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 10;
+let ipPc = 1;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -67,6 +67,7 @@ async function Inicial() {
             continue;
         }
         console.log("Cantidad de mensaje whatsapp=>>>>", resultado.length);
+        //await Procedures.sleep(20);
         for (let row of resultado) {
             await ProcesoQR( row );
             console.log(">>>>>>>>>>>>>>>>>>**Lista de todos los numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
