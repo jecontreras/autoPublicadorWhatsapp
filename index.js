@@ -1,5 +1,6 @@
 const { Client, LegacySessionAuth, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const _process = require('./process/procesosLogicChat.js');
 
 let countRequest = 0;
 var browser = Object();
@@ -9,7 +10,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 1;
+let ipPc = 11;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -28,7 +29,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: false,
+        headless: true,
         args: ['--no-sandbox']
     }
 });
@@ -51,10 +52,52 @@ client.on('message', async (message) => {
     if(message.body === '!ping') {
         message.reply('pong');
         const chat = await message.getChat();
+        const contact = await msg.getContact();
+        await chat.sendMessage(`Hello @${contact.id.user}`, {
+            mentions: [contact]
+        });
         const media = await MessageMedia.fromUrl('https://via.placeholder.com/350x150.png');
         chat.sendMessage(media);
     }
+    let result = await _process.init(message.body);
+    //console.log("***63", result)
+    if( result.length ) {
+        for( let row of result ) {
+            if( row == '04'){
+                try {
+                    let img = await processImg();
+                    //console.log("***68", img)
+                    img = img.data[0];
+                    let rm = await SendImg( img.listRotador, message.from );
+                    //console.log("***FINIX****", rm)
+                } catch (error) { }
+            }
+            else message.reply( row );
+        }
+    }
 });
+
+async function SendImg( listRotador, chatId ){
+    for( let row of listRotador ){
+        if( !row.galeriaList ) row.galeriaList = [];
+        for( let key of row.galeriaList ){
+            const media = await MessageMedia.fromUrl( key.foto );
+            await client.sendMessage(chatId, media);
+        }
+        await client.sendMessage(chatId, row.mensaje );
+    }
+    return true;
+}
+
+async function processImg (){
+    let resultado = Array();
+    resultado = await getURL('galeria/querys', JSON.stringify({ where: {
+        id: "64ae40b5802dc8001412ac05"
+    }, limit: 1, page: 0, }), 'POST');
+      console.log("****99", resultado)
+    if( !resultado ) return [];
+    else return resultado;
+}
 async function Inicial() {
     let resultado = Array();
     console.log("INIT Del Bloque ", new Date().toTimeString())
@@ -120,7 +163,7 @@ async function ProcesoEn( row ){
                      let msx = await Procedures.validandoRotador(result.mensaje, countRotador);
                      let process = await Procedures.enviarWhatsapp(key, result.mensaje, msx);
                      process = await Procedures.validandoMsxEnviados(item, key);
-                     process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
+                     //process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
                      countMsx++;
                  }
                  console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
@@ -241,7 +284,7 @@ async function getURL(url, bodys, metodo) {
                 resolve(false);
                 //throw new Error(error);
             }
-            //console.log( response.body)
+            console.log( "result*********",response.body)
             try {
                 // console.log(response.body);
                 resolve(JSON.parse(response.body));
@@ -265,9 +308,9 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
             
         // Number where you want to send the message.
         //const number = "+573156027551";
-        number = "+" + number;
+        number = "+57" + number;
         // Your message.
-        const text = msx.text || "Hola jose";
+        const text = msx.text || "";
         let listImg = msx.files;
         if( !msx.files ) listImg = [];
         // Getting chatId from the number.

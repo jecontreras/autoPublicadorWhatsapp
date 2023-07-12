@@ -9,7 +9,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 15;
+let ipPc = 1;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -28,7 +28,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: true,
+        headless: false,
         args: ['--no-sandbox']
     }
 });
