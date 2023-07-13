@@ -64,8 +64,19 @@ client.on('message', async (message) => {
     if( result.length ) {
         for( let row of result ) {
             if( row == '04'){
+                message.reply( "Ok Espera un momento..." );
                 try {
-                    let img = await processImg();
+                    let img = await processImg("64ae40b5802dc8001412ac05");
+                    //console.log("***68", img)
+                    img = img.data[0];
+                    let rm = await SendImg( img.listRotador, message.from );
+                    //console.log("***FINIX****", rm)
+                } catch (error) { }
+            }
+            if( row == '05'){
+                message.reply( "Ok Espera un momento..." );
+                try {
+                    let img = await processImg("64af63db865a1300140ee306");
                     //console.log("***68", img)
                     img = img.data[0];
                     let rm = await SendImg( img.listRotador, message.from );
@@ -89,10 +100,10 @@ async function SendImg( listRotador, chatId ){
     return true;
 }
 
-async function processImg (){
+async function processImg (id){
     let resultado = Array();
     resultado = await getURL('galeria/querys', JSON.stringify({ where: {
-        id: "64ae40b5802dc8001412ac05"
+        id: id
     }, limit: 1, page: 0, }), 'POST');
       console.log("****99", resultado)
     if( !resultado ) return [];
