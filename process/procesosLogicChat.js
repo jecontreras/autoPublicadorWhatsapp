@@ -2,7 +2,18 @@ let Procedures = Object();
 Procedures.init = async(msx)=>{
     let txt = String();
     let validateMsx = Boolean();
-    validateMsx = await Procedures.ContienePalabra( msx, 'Hola');
+    validateMsx = await Procedures.ContienePalabra( msx, 'He visto esto en Facebook');
+    console.log("******VALIDANDO HOLA********", validateMsx)
+    if( validateMsx === true ) return [
+        "¡Hola Buen Día! Bienvenidos a la Tienda Virtual @liam_stilos",
+        `
+        01. Ver catalogó!
+        02. Hacer pedido!
+        03. ¡Chatear con un asesor!
+        00. Volver al menú principal!`
+    ];
+    /////////////////////////////////////////////////////////////////////////////////
+    validateMsx = await Procedures.ContienePalabra( msx, 'hola');
     console.log("******VALIDANDO HOLA********", validateMsx)
     if( validateMsx === true ) return [
         "¡Hola Buen Día! Bienvenidos a la Tienda Virtual @liam_stilos",

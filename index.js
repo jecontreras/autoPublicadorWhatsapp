@@ -63,25 +63,40 @@ client.on('message', async (message) => {
     //console.log("***63", result)
     if( result.length ) {
         for( let row of result ) {
-            if( row == '04'){
-                message.reply( "Ok Espera un momento..." );
-                try {
-                    let img = await processImg("64ae40b5802dc8001412ac05");
-                    //console.log("***68", img)
-                    img = img.data[0];
-                    let rm = await SendImg( img.listRotador, message.from );
-                    //console.log("***FINIX****", rm)
-                } catch (error) { }
-            }
-            if( row == '05'){
-                message.reply( "Ok Espera un momento..." );
-                try {
-                    let img = await processImg("64af63db865a1300140ee306");
-                    //console.log("***68", img)
-                    img = img.data[0];
-                    let rm = await SendImg( img.listRotador, message.from );
-                    //console.log("***FINIX****", rm)
-                } catch (error) { }
+            if( row == '04' || row == '05' ){
+                if( row == '04'){
+                    message.reply( "Ok Espera un momento..." );
+                    try {
+                        let img = await processImg("64ae40b5802dc8001412ac05");
+                        //console.log("***68", img)
+                        img = img.data[0];
+                        let rm = await SendImg( img.listRotador, message.from );
+                        //console.log("***FINIX****", rm)
+                    } catch (error) { }
+                }
+                if( row == '05'){
+                    message.reply( "Ok Espera un momento..." );
+                    try {
+                        let img = await processImg("64af63db865a1300140ee306");
+                        //console.log("***68", img)
+                        img = img.data[0];
+                        let rm = await SendImg( img.listRotador, message.from );
+                        //console.log("***FINIX****", rm)
+                    } catch (error) { }
+                }
+                message.reply( `
+                    *Para el proceso de hacer pedido los requisitos son*
+                    1. Foto o modelo del producto interesado?
+                    2. Ciudad de Destino?
+                    3. Nombre de la persona a recibir?
+                    4. Talla interesado?
+                    5. ¿Direccion a recibir?
+                    6. ¿Telefono de quien lo recibe?
+                
+                    ¡Nota! Una vez nos manda toda la información nosotros nos encargamos del proceso de validación de tu pedido y en breve te mandaremos el número de guía.
+                    Recuerda que todos nuestros envíos son dé forma *Gratuita*
+                    ¡Gracias por tu compra y por preferirnos Feliz día!
+                ` );
             }
             else message.reply( row );
         }
