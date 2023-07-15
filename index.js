@@ -124,6 +124,8 @@ async function processImg (id){
     if( !resultado ) return [];
     else return resultado;
 }
+
+
 async function Inicial() {
     let resultado = Array();
     console.log("INIT Del Bloque ", new Date().toTimeString())
@@ -279,6 +281,98 @@ Procedures.validandoMsxEnviados = async( dataMsx, numero )=>{
 Procedures.actualizarEnviadorMsx = async( mensaje, count )=>{
     await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count }), 'PUT');
 }
+
+async function ProcesosDeGuia(){
+    
+}
+//consultaGuiasEnvia('114012512055')
+async function consultaGuiasEnvia(idGuia){
+    let resultado = Array();
+    resultado = await getAPI(`https://portal.envia.co/ServicioRestConsultaEstados/Service1Consulta.svc/ConsultaEstadoGuia/${ idGuia }`, 
+    JSON.stringify({}),
+    {
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,und;q=0.6,pl;q=0.5,pt;q=0.4',
+        'Connection': 'keep-alive',
+        'Origin': 'https://envia.co',
+        'Referer': 'https://envia.co/',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-site',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"'
+      }, 
+      'GET');
+      console.log("****99", resultado)
+    if( !resultado ) return [];
+    else return resultado;
+}
+
+//consultaGuiasServi('2188150861')
+async function consultaGuiasServi(idGuia){
+    let resultado = Array();
+    resultado = await getAPI(`https://mobile.servientrega.com/Services/ShipmentTracking/api/ControlRastreovalidaciones`, 
+    JSON.stringify({
+        "numeroGuia": idGuia,
+        "idValidacionUsuario": "0",
+        "tipoDatoValidar": "0",
+        "datoRespuestaUsuario": "0",
+        "idpais": 1,
+        "lenguaje": "es"
+    }),
+    {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Accept-Language': 'es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,und;q=0.6,pl;q=0.5,pt;q=0.4',
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/json',
+        'Cookie': '_ga=GA1.2.2015840509.1689381896; _gid=GA1.2.1659972767.1689381896; _gat=1',
+        'Origin': 'https://mobile.servientrega.com',
+        'Referer': 'https://mobile.servientrega.com/WebSitePortal/RastreoEnvioDetalle.html?Guia=2188150861',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"'
+      }, 
+      'POST');
+      console.log("****99", resultado)
+    if( !resultado ) return [];
+    else return resultado;
+}
+
+async function getAPI(url, bodys, headers, metodo) {
+    var request = require('request');
+    console.log("******************URL API", url)
+    return new Promise(resolve => {
+        var options = {
+            'method': metodo,
+            'url': url,
+            'headers': headers,
+            body: bodys
+        };
+        request(options, function (error, response) {
+            if (error) {
+                //detenerServer();
+                resolve(false);
+                //throw new Error(error);
+            }
+            console.log( "result*********",response.body)
+            try {
+                // console.log(response.body);
+                resolve(JSON.parse(response.body));
+            } catch (error) {
+                console.log(error);
+                resolve(false);
+            }
+        });
+    });
+}
+
 
 async function getURL(url, bodys, metodo) {
     var request = require('request');
