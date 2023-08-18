@@ -1,5 +1,6 @@
 const { Client, LegacySessionAuth, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const _process = require('./process/procesosLogicChat.js');
 
 let countRequest = 0;
 var browser = Object();
@@ -9,7 +10,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 1;
+let ipPc = 11;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -28,7 +29,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: false,
+        headless: true,
         args: ['--no-sandbox']
     }
 });
@@ -47,14 +48,84 @@ client.on('authenticated', (session) => {
 });
 
 client.on('message', async (message) => {
-    //console.log("****", message )
-    /*if(message.body === '!ping') {
+    console.log("****", message )
+    if(message.body === '!ping') {
         message.reply('pong');
         const chat = await message.getChat();
+        const contact = await msg.getContact();
+        await chat.sendMessage(`Hello @${contact.id.user}`, {
+            mentions: [contact]
+        });
         const media = await MessageMedia.fromUrl('https://via.placeholder.com/350x150.png');
         chat.sendMessage(media);
-    }*/
+    }
+    let result = await _process.init(message.body);
+    //console.log("***63", result)
+    if( result.length ) {
+        for( let row of result ) {
+            if( row == '04' || row == '05' ){
+                if( row == '04'){
+                    message.reply( "Ok Espera un momento..." );
+                    try {
+                        let img = await processImg("64ae40b5802dc8001412ac05");
+                        //console.log("***68", img)
+                        img = img.data[0];
+                        let rm = await SendImg( img.listRotador, message.from );
+                        //console.log("***FINIX****", rm)
+                    } catch (error) { }
+                }
+                if( row == '05'){
+                    message.reply( "Ok Espera un momento..." );
+                    try {
+                        let img = await processImg("64af63db865a1300140ee306");
+                        //console.log("***68", img)
+                        img = img.data[0];
+                        let rm = await SendImg( img.listRotador, message.from );
+                        //console.log("***FINIX****", rm)
+                    } catch (error) { }
+                }
+                message.reply( `
+                    *Para el proceso de hacer pedido los requisitos son*
+                    1. Foto o modelo del producto interesado?
+                    2. Ciudad de Destino?
+                    3. Nombre de la persona a recibir?
+                    4. Talla interesado?
+                    5. ¿Direccion a recibir?
+                    6. ¿Telefono de quien lo recibe?
+                
+                    ¡Nota! Una vez nos manda toda la información nosotros nos encargamos del proceso de validación de tu pedido y en breve te mandaremos el número de guía.
+                    Recuerda que todos nuestros envíos son dé forma *Gratuita*
+                    ¡Gracias por tu compra y por preferirnos Feliz día!
+                ` );
+            }
+            else message.reply( row );
+        }
+    }
 });
+
+async function SendImg( listRotador, chatId ){
+    for( let row of listRotador ){
+        if( !row.galeriaList ) row.galeriaList = [];
+        for( let key of row.galeriaList ){
+            const media = await MessageMedia.fromUrl( key.foto );
+            await client.sendMessage(chatId, media);
+        }
+        await client.sendMessage(chatId, row.mensaje );
+    }
+    return true;
+}
+
+async function processImg (id){
+    let resultado = Array();
+    resultado = await getURL('galeria/querys', JSON.stringify({ where: {
+        id: id
+    }, limit: 1, page: 0, }), 'POST');
+      console.log("****99", resultado)
+    if( !resultado ) return [];
+    else return resultado;
+}
+
+
 async function Inicial() {
     let resultado = Array();
     console.log("INIT Del Bloque ", new Date().toTimeString())
@@ -120,7 +191,7 @@ async function ProcesoEn( row ){
                      let msx = await Procedures.validandoRotador(result.mensaje, countRotador);
                      let process = await Procedures.enviarWhatsapp(key, result.mensaje, msx);
                      process = await Procedures.validandoMsxEnviados(item, key);
-                     process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
+                     //process = await Procedures.actualizarEnviadorMsx(result.mensaje, count);
                      countMsx++;
                  }
                  console.log(">>>>>>>>>>>>>>>>>>**Lista de numeros completado****<<<<<<<<<<<<<<<<<<<<<<<<<<");
@@ -211,6 +282,98 @@ Procedures.actualizarEnviadorMsx = async( mensaje, count )=>{
     await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count }), 'PUT');
 }
 
+async function ProcesosDeGuia(){
+    
+}
+//consultaGuiasEnvia('114012512055')
+async function consultaGuiasEnvia(idGuia){
+    let resultado = Array();
+    resultado = await getAPI(`https://portal.envia.co/ServicioRestConsultaEstados/Service1Consulta.svc/ConsultaEstadoGuia/${ idGuia }`, 
+    JSON.stringify({}),
+    {
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,und;q=0.6,pl;q=0.5,pt;q=0.4',
+        'Connection': 'keep-alive',
+        'Origin': 'https://envia.co',
+        'Referer': 'https://envia.co/',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-site',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"'
+      }, 
+      'GET');
+      console.log("****99", resultado)
+    if( !resultado ) return [];
+    else return resultado;
+}
+
+//consultaGuiasServi('2188150861')
+async function consultaGuiasServi(idGuia){
+    let resultado = Array();
+    resultado = await getAPI(`https://mobile.servientrega.com/Services/ShipmentTracking/api/ControlRastreovalidaciones`, 
+    JSON.stringify({
+        "numeroGuia": idGuia,
+        "idValidacionUsuario": "0",
+        "tipoDatoValidar": "0",
+        "datoRespuestaUsuario": "0",
+        "idpais": 1,
+        "lenguaje": "es"
+    }),
+    {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Accept-Language': 'es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,und;q=0.6,pl;q=0.5,pt;q=0.4',
+        'Connection': 'keep-alive',
+        'Content-Type': 'application/json',
+        'Cookie': '_ga=GA1.2.2015840509.1689381896; _gid=GA1.2.1659972767.1689381896; _gat=1',
+        'Origin': 'https://mobile.servientrega.com',
+        'Referer': 'https://mobile.servientrega.com/WebSitePortal/RastreoEnvioDetalle.html?Guia=2188150861',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest',
+        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"'
+      }, 
+      'POST');
+      console.log("****99", resultado)
+    if( !resultado ) return [];
+    else return resultado;
+}
+
+async function getAPI(url, bodys, headers, metodo) {
+    var request = require('request');
+    console.log("******************URL API", url)
+    return new Promise(resolve => {
+        var options = {
+            'method': metodo,
+            'url': url,
+            'headers': headers,
+            body: bodys
+        };
+        request(options, function (error, response) {
+            if (error) {
+                //detenerServer();
+                resolve(false);
+                //throw new Error(error);
+            }
+            console.log( "result*********",response.body)
+            try {
+                // console.log(response.body);
+                resolve(JSON.parse(response.body));
+            } catch (error) {
+                console.log(error);
+                resolve(false);
+            }
+        });
+    });
+}
+
+
 async function getURL(url, bodys, metodo) {
     var request = require('request');
     console.log("******************URL", url)
@@ -241,7 +404,7 @@ async function getURL(url, bodys, metodo) {
                 resolve(false);
                 //throw new Error(error);
             }
-            //console.log( response.body)
+            console.log( "result*********",response.body)
             try {
                 // console.log(response.body);
                 resolve(JSON.parse(response.body));
@@ -265,9 +428,9 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
             
         // Number where you want to send the message.
         //const number = "+573156027551";
-        number = "+" + number;
+        number = "+57" + number;
         // Your message.
-        const text = msx.text || "Hola jose";
+        const text = msx.text || "";
         let listImg = msx.files;
         if( !msx.files ) listImg = [];
         // Getting chatId from the number.
@@ -281,7 +444,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
                     const media = await MessageMedia.fromUrl( key.foto );
                     await client.sendMessage(chatId, media);
                 }
-                await client.sendMessage(chatId, row.mensaje || text );
+                await client.sendMessage(chatId, row.mensaje );
             }
         }else{
             // Sending message.
