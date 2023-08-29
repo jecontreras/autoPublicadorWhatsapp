@@ -281,7 +281,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
                     const media = await MessageMedia.fromUrl( key.foto );
                     await client.sendMessage(chatId, media);
                 }
-                await client.sendMessage(chatId, row.mensaje );
+                await client.sendMessage(chatId, row.mensaje || text );
             }
         }else{
             // Sending message.
