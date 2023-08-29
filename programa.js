@@ -28,7 +28,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: false,
+        headless: true,
         args: ['--no-sandbox']
     }
 });
@@ -93,6 +93,7 @@ async function ProcesoQR( row){
 
 
 async function ProcesoReady( row ){
+    console.log("***ESPERANDO READY")
     client.on("ready", async () => {
         console.log("WHATSAPP WEB => Ready");
         await ProcesoEn( row );
