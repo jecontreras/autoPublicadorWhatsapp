@@ -9,7 +9,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 9;
+let ipPc = 16;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -28,7 +28,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: true,
+        headless: false,
         args: ['--no-sandbox']
     }
 });
@@ -266,7 +266,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
             
         // Number where you want to send the message.
         //const number = "+573156027551";
-        number = "+" + number;
+        number = "+57" + number;
         // Your message.
         const text = msx.text || "Hola jose";
         let listImg = msx.files;

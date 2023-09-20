@@ -10,7 +10,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 11;
+let ipPc = 4;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -428,7 +428,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
             
         // Number where you want to send the message.
         //const number = "+573156027551";
-        number = "+57" + number;
+        number = "+" + number;
         // Your message.
         const text = msx.text || "";
         let listImg = msx.files;
