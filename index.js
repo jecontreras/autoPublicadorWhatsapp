@@ -10,7 +10,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 11;
+let ipPc = 16;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
@@ -29,7 +29,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: true,
+        headless: false,
         args: ['--no-sandbox']
     }
 });
@@ -361,7 +361,7 @@ async function getAPI(url, bodys, headers, metodo) {
                 resolve(false);
                 //throw new Error(error);
             }
-            console.log( "result*********",response.body)
+            //console.log( "result*********",response.body)
             try {
                 // console.log(response.body);
                 resolve(JSON.parse(response.body));
@@ -404,7 +404,7 @@ async function getURL(url, bodys, metodo) {
                 resolve(false);
                 //throw new Error(error);
             }
-            console.log( "result*********",response.body)
+            //console.log( "result*********",response.body)
             try {
                 // console.log(response.body);
                 resolve(JSON.parse(response.body));
