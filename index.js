@@ -1,4 +1,4 @@
-const { Client, LegacySessionAuth, LocalAuth, MessageMedia } = require('whatsapp-web.js');
+const { Client, LegacySessionAuth, LocalAuth, MessageMedia, Buttons  } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const _process = require('./process/procesosLogicChat.js');
 
@@ -49,6 +49,9 @@ client.on('authenticated', (session) => {
 
 client.on('message', async (message) => {
     console.log("****", message )
+    
+    let button = new Buttons('Button body',[{body:'bt1'},{body:'bt2'},{body:'bt3'}],'title','footer');
+    client.sendMessage(message.from, button);
     if(message.body === '!ping') {
         message.reply('pong');
         const chat = await message.getChat();
@@ -100,6 +103,10 @@ client.on('message', async (message) => {
             }
             else message.reply( row );
         }
+    }
+    if(message.hasMedia) {
+        const media = await message.downloadMedia();
+        // do something with the media data here
     }
 });
 
@@ -258,7 +265,7 @@ Procedures.enviarWhatsapp = async( dataUser, dataMensaje, msx )=>{
     try {
         console.log( "454546", dataUser, dataMensaje, msx)
         //console.log("url-------->>>>>", `https://web.whatsapp.com/send?phone=${ dataUser.telefono }&text=${ encodeURIComponent(`${ msx.text }`) }&source&data&app_absent`);
-        await envioWhatsapp( client, dataUser.telefono, msx,dataMensaje );
+        //await envioWhatsapp( client, dataUser.telefono, msx,dataMensaje );
         await Procedures.sleep( dataMensaje.cantidadTiempoMensaje || 15 );
         console.log("FINIX Enviado");
         return true;

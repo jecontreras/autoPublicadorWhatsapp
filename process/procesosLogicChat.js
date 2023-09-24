@@ -24,12 +24,25 @@ Procedures.init = async(msx)=>{
         00. Volver al menú principal!`
     ];
     /////////////////////////////////////////////////////////////////////////////////
+    validateMsx = await Procedures.ContienePalabra( msx, 'inicial');
+    console.log("******VALIDANDO HOLA********", validateMsx)
+    if( validateMsx === true ) return [
+        "¡Hola Buen Día! Bienvenidos a la Tienda Virtual @liam_stilos",
+        `
+        01. *Ver catalogó!*
+        02. *Hacer pedido!*
+        03. *¡Chatear con un asesor!*
+        00. *Volver al menú principal!*`
+    ];
+    /////////////////////////////////////////////////////////////////////////////////
     validateMsx = await Procedures.ContienePalabra( msx, '01');
     console.log("******VALIDANDO VER CATALOGO********", validateMsx)
     if( validateMsx === true ) return [
         `
         04 Ver Catalogo de Hombre
         05 Ver Catalogo de Mujer
+        06 Ver Catalogo de Jean Hombre
+        07 Ver Catalogo de Jean Mujer
         00. Volver al menú principal
         `
     ];
