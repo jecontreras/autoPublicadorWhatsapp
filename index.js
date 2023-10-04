@@ -29,7 +29,7 @@ const client = new Client({
       clientId: "client-one"
     }),
     puppeteer: {
-        headless: false,
+        headless: true,
         args: ['--no-sandbox']
     }
 });
