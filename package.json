@@ -16,7 +16,7 @@
     "whatsapp-web.js": "^1.22.2-alpha.1"
   },
   "scripts": {
-    "start": "nodemon programa.js",
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
