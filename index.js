@@ -23,7 +23,7 @@ if(fs.existsSync(SESSION_FILE_PATH)) {
 // Use the saved values
 const client = new Client({
     puppeteer: {
-        executablePath: '/usr/bin/brave-browser-stable',
+        //executablePath: '/usr/bin/brave-browser-stable',
         args: ['--no-sandbox', "--disable-setuid-sandbox"],
         headless: true,
     },
