@@ -50,8 +50,6 @@ client.on('authenticated', (session) => {
 client.on('message', async (message) => {
     console.log("****", message )
     
-    let button = new Buttons('Button body',[{body:'bt1'},{body:'bt2'},{body:'bt3'}],'title','footer');
-    client.sendMessage(message.from, button);
     if(message.body === '!ping') {
         message.reply('pong');
         const chat = await message.getChat();
@@ -62,46 +60,22 @@ client.on('message', async (message) => {
         const media = await MessageMedia.fromUrl('https://via.placeholder.com/350x150.png');
         chat.sendMessage(media);
     }
-    let result = await _process.init(message.body);
+    let result = await _process.init(message.body, message.to);
     //console.log("***63", result)
     if( result.length ) {
         for( let row of result ) {
-            if( row == '04' || row == '05' ){
-                if( row == '04'){
-                    message.reply( "Ok Espera un momento..." );
-                    try {
-                        let img = await processImg("64ae40b5802dc8001412ac05");
-                        //console.log("***68", img)
-                        img = img.data[0];
-                        let rm = await SendImg( img.listRotador, message.from );
-                        //console.log("***FINIX****", rm)
-                    } catch (error) { }
-                }
-                if( row == '05'){
-                    message.reply( "Ok Espera un momento..." );
-                    try {
-                        let img = await processImg("64af63db865a1300140ee306");
-                        //console.log("***68", img)
-                        img = img.data[0];
-                        let rm = await SendImg( img.listRotador, message.from );
-                        //console.log("***FINIX****", rm)
-                    } catch (error) { }
-                }
-                message.reply( `
-                    *Para el proceso de hacer pedido los requisitos son*
-                    1. Foto o modelo del producto interesado?
-                    2. Ciudad de Destino?
-                    3. Nombre de la persona a recibir?
-                    4. Talla interesado?
-                    5. ¿Direccion a recibir?
-                    6. ¿Telefono de quien lo recibe?
-                
-                    ¡Nota! Una vez nos manda toda la información nosotros nos encargamos del proceso de validación de tu pedido y en breve te mandaremos el número de guía.
-                    Recuerda que todos nuestros envíos son dé forma *Gratuita*
-                    ¡Gracias por tu compra y por preferirnos Feliz día!
-                ` );
+            if( row.indicador == '04' ){
+                message.reply( "Ok Espera un momento..." );
+                try {
+                    let img = await processImg( row.data );
+                    //console.log("***68", img)
+                    img = img.data[0];
+                    let rm = await SendImg( img.listRotador, message.from );
+                    //console.log("***FINIX****", rm)
+                } catch (error) { }
+                message.reply( row.dataEnd );
             }
-            else message.reply( row );
+            else message.reply( row.data );
         }
     }
     if(message.hasMedia) {
