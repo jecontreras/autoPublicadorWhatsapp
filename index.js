@@ -1,19 +1,35 @@
 const { Client, LegacySessionAuth, LocalAuth, MessageMedia, Buttons  } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const _process = require('./process/procesosLogicChat.js');
+const io = require('socket.io-client');
+const sailsServerURL = 'http://localhost:1335'; // Reemplaza con la URL de tu servidor Sails.js
+const puppeteer = require('puppeteer');
 
-let countRequest = 0;
-var browser = Object();
-const mime = require('mime'); // npm install mime
-const path = require('path');
 const fs = require('fs');
-const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
+let countRequest = 0;
 let page;
 let ipPc = 16;
+let getUser = {};
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
+
+const socket = io.connect(sailsServerURL, {
+  reconnection: true, // Habilita la reconexión
+  reconnectionDelay: 1000, // Retardo en milisegundos antes de intentar reconectar
+});
+
+socket.on('connect', () => {
+  console.log('Conectado al servidor Sails.js a través de Socket.IO');
+});
+
+socket.on('disconnect', () => {
+  console.log('Desconectado del servidor Sails.js');
+});
+
+
+
 // Load the session data if it has been previously saved
 let sessionData;
 if(fs.existsSync(SESSION_FILE_PATH)) {
@@ -47,47 +63,75 @@ client.on('authenticated', (session) => {
 
 client.on('message', async (message) => {
     console.log("****", message )
-    
-    if(message.body === '!ping') {
-        message.reply('pong');
-        const chat = await message.getChat();
-        const contact = await msg.getContact();
-        await chat.sendMessage(`Hello @${contact.id.user}`, {
-            mentions: [contact]
-        });
-        const media = await MessageMedia.fromUrl('https://via.placeholder.com/350x150.png');
-        chat.sendMessage(media);
-    }
-    let result = await _process.init(message.body, message.to);
-    //console.log("***63", result)
-    if( result.length ) {
-        for( let row of result ) {
-            if( row.indicador == '04' ){
-                message.reply( "Ok Espera un momento..." );
-                try {
-                    let img = await processImg( row.data );
-                    //console.log("***68", img)
-                    img = img.data[0];
-                    let rm = await SendImg( img.listRotador, message.from );
-                    //console.log("***FINIX****", rm)
-                } catch (error) { }
-                message.reply( row.dataEnd );
-            }
-            else message.reply( row.data );
+    if( !message.author ) {
+        senMsxRecord( message );
+        if(message.body === '!ping') {
+            message.reply('pong');
+            const chat = await message.getChat();
+            const contact = await msg.getContact();
+            await chat.sendMessage(`Hello @${contact.id.user}`, {
+                mentions: [contact]
+            });
+            const media = await MessageMedia.fromUrl('https://via.placeholder.com/350x150.png');
+            chat.sendMessage(media);
         }
-    }
-    if(message.hasMedia) {
-        const media = await message.downloadMedia();
-        // do something with the media data here
+        let result = await _process.init(message.body, message.to);
+        console.log("***63", result)
+        if( !result ) return true;
+        if( result.length ) {
+            for( let row of result ) {
+                if( row.indicador == '04' ){
+                    message.reply( "Ok Espera un momento..." );
+                    try {
+                        let img = await processImg( row.data );
+                        //console.log("***68", img)
+                        img = img.data[0];
+                        let rm = await SendImg( img.listRotador, message.from, message );
+                        //console.log("***FINIX****", rm)
+                    } catch (error) { }
+                    message.reply( row.dataEnd );
+                }
+                else {
+                    message.reply( row.data );
+                    senMsxRecord( { 
+                        from: message.to,
+                        to: message.from,
+                        body: row.data,
+                        urlMedios: "",
+                        quien: 1,
+                        sendWhatsapp: 1
+                    } );
+                }
+            }
+        }
+        if(message.hasMedia) {
+            const media = await message.downloadMedia();
+            // do something with the media data here
+        }
     }
 });
 
-async function SendImg( listRotador, chatId ){
+
+async function senMsxRecord ( message ){
+    if( !getUser.id ) await getPerfilUser()
+    resultado = await getURL('whatsapphistorial/escucha', JSON.stringify( { msx: message, user: getUser } ), 'POST');
+    return "completado";
+}
+
+async function SendImg( listRotador, chatId, message ){
     for( let row of listRotador ){
         if( !row.galeriaList ) row.galeriaList = [];
         for( let key of row.galeriaList ){
             const media = await MessageMedia.fromUrl( key.foto );
             await client.sendMessage(chatId, media);
+            senMsxRecord( { 
+                from: message.to,
+                to: message.from,
+                body: "",
+                urlMedios: key.foto,
+                quien: 1,
+                sendWhatsapp: 1
+            } );
         }
         await client.sendMessage(chatId, row.mensaje );
     }
@@ -134,20 +178,24 @@ async function ProcesoQR( row){
             qrIP = qr;
             row.url = qr;
             qrcode.generate(qr, { small: true });
+            if( !row )SubirImagenPerfil( { url: qr } );
             if( row ) SubirImagen( row );
             resolve( true );
         });
-        await ProcesoReady( row );
+        //await ProcesoReady( row );
     })
 }
 
-
-async function ProcesoReady( row ){
-    client.on("ready", async () => {
-        console.log("WHATSAPP WEB => Ready");
-        await ProcesoEn( row );
-    });
-}
+let vandera = false;
+client.on("ready", async () => {
+    console.log("WHATSAPP WEB => Ready");
+    if( vandera === false ){
+        vandera = true;
+        validadorChat();
+        //getGuideInter();
+        //await ProcesoEn( row );s
+    }
+});
 
 async function ProcesoEn( row ){
     return new Promise( async( resolve ) =>{
@@ -191,6 +239,7 @@ Procedures.getMensajes = async ( id )=>{
 }
 
 Procedures.getPlataformas = async ( row, id = String, cantidadLista = 1 )=>{
+    if( !row ) return { listaMensaje: [], mensaje: {} };
     let resultado = await getURL('mensajes/getPlataformas', JSON.stringify({ url: row.urlConfirmacion, id: id, cantidadLista }), 'POST');
     // console.log("***", resultado)
     return resultado.data || { listaMensaje: [], mensaje: {} };
@@ -261,68 +310,6 @@ Procedures.actualizarEnviadorMsx = async( mensaje, count )=>{
     await getURL('mensajes/' + mensaje.id, JSON.stringify({ cantidadEnviado: count }), 'PUT');
 }
 
-async function ProcesosDeGuia(){
-    
-}
-//consultaGuiasEnvia('114012512055')
-async function consultaGuiasEnvia(idGuia){
-    let resultado = Array();
-    resultado = await getAPI(`https://portal.envia.co/ServicioRestConsultaEstados/Service1Consulta.svc/ConsultaEstadoGuia/${ idGuia }`, 
-    JSON.stringify({}),
-    {
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,und;q=0.6,pl;q=0.5,pt;q=0.4',
-        'Connection': 'keep-alive',
-        'Origin': 'https://envia.co',
-        'Referer': 'https://envia.co/',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-site',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"'
-      }, 
-      'GET');
-      console.log("****99", resultado)
-    if( !resultado ) return [];
-    else return resultado;
-}
-
-//consultaGuiasServi('2188150861')
-async function consultaGuiasServi(idGuia){
-    let resultado = Array();
-    resultado = await getAPI(`https://mobile.servientrega.com/Services/ShipmentTracking/api/ControlRastreovalidaciones`, 
-    JSON.stringify({
-        "numeroGuia": idGuia,
-        "idValidacionUsuario": "0",
-        "tipoDatoValidar": "0",
-        "datoRespuestaUsuario": "0",
-        "idpais": 1,
-        "lenguaje": "es"
-    }),
-    {
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'Accept-Language': 'es-US,es-419;q=0.9,es;q=0.8,en;q=0.7,und;q=0.6,pl;q=0.5,pt;q=0.4',
-        'Connection': 'keep-alive',
-        'Content-Type': 'application/json',
-        'Cookie': '_ga=GA1.2.2015840509.1689381896; _gid=GA1.2.1659972767.1689381896; _gat=1',
-        'Origin': 'https://mobile.servientrega.com',
-        'Referer': 'https://mobile.servientrega.com/WebSitePortal/RastreoEnvioDetalle.html?Guia=2188150861',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        'X-Requested-With': 'XMLHttpRequest',
-        'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"'
-      }, 
-      'POST');
-      console.log("****99", resultado)
-    if( !resultado ) return [];
-    else return resultado;
-}
 
 async function getAPI(url, bodys, headers, metodo) {
     var request = require('request');
@@ -355,12 +342,12 @@ async function getAPI(url, bodys, headers, metodo) {
 
 async function getURL(url, bodys, metodo) {
     var request = require('request');
-    console.log("******************URL", url)
+    console.log("******************URL", url, "¨¨", metodo)
     return new Promise(resolve => {
         var options = {
             'method': metodo,
-            'url': `https://whatsappapiweb.herokuapp.com/${url}`,
-            //'url': `http://localhost:1138/${url}`,
+            //'url': `https://whatsappapiweb.herokuapp.com/${url}`,
+            'url': `http://localhost:1335/${url}`,
             'headers': {
                 'Connection': 'keep-alive',
                 'Accept': 'application/json, text/plain, */*',
@@ -385,10 +372,10 @@ async function getURL(url, bodys, metodo) {
             }
             //console.log( "result*********",response.body)
             try {
-                // console.log(response.body);
+                //console.log(response.body);
                 resolve(JSON.parse(response.body));
             } catch (error) {
-                console.log(error);
+                //console.log("ENTRO EL ERROR",error);
                 resolve(false);
             }
         });
@@ -399,6 +386,30 @@ Procedures.sleep = async (minutos) => {
     return new Promise(resolve => {
         setTimeout(async () => { resolve(true) }, minutos * 1000);
     });
+}
+
+async function validadorChat(){
+    if( !getUser.id ) await getPerfilUser()
+    while (true) {
+        await Procedures.sleep( 8 );
+        let newMsx = await getURL('WhatsappHistorial/querys', JSON.stringify({ where: { sendWhatsapp: 0, user: getUser.id, quien: 1 } }), 'POST');
+        console.log("***436", newMsx.length )
+        if( newMsx.data.length ) {
+            for( let row of newMsx.data ){
+                let dsCuerpo = { text: row.txt, listRotador: [] }
+                if( row.urlMedios ) dsCuerpo.listRotador = [ { galeriaList: [ { foto: row.urlMedios } ] } ];
+                console.log( dsCuerpo)
+                await envioWhatsapp( client, row.Sinto, dsCuerpo, dsCuerpo);
+                await Procedures.sleep( 3 );
+                await updateValidadorChat( row );
+            }
+        }
+    }
+}
+
+async function updateValidadorChat( row ){
+    let result = await getURL('WhatsappHistorial/'+row.id, JSON.stringify({  sendWhatsapp: 1, id: row.id }), 'PUT');
+    return true;
 }
 
 async function envioWhatsapp( client, number, msx, dataMensaje ) {
@@ -437,7 +448,99 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
 }
 
 async function SubirImagen(row) {
-    await getURL('mensajes/' + row.id, JSON.stringify({ imagenWhat: row.url }), 'PUT');
+    await getURL('WhatsappTxt/' + row.id, JSON.stringify({ imagenWhat: row.url }), 'PUT');
+    return true;
 }
 
+async function getPerfilUser(){
+    getUser =  await getURL('user/querys', JSON.stringify({ where: { ip: ipPc } }), 'POST');
+    getUser = getUser.data[0];
+    return true;
+}
+
+async function SubirImagenPerfil(row) {
+    console.log("**ENTRE IP QR")
+    if( !getUser.id ) await getPerfilUser()
+    //console.log("******448", getUser)
+    try {
+        let rm = await getURL('whatsappInfo/querys', JSON.stringify({ where: { user: getUser.id } }), 'POST');
+        rm = rm.data[0];
+        await getURL('whatsappInfo/' + rm.id, JSON.stringify({ qr: row.url }), 'PUT');
+    } catch (error) {
+        
+    }
+}
+
+async function getGuideInter(){
+    let getWhatsapp =  await getURL('WhatsappTxt/querys', JSON.stringify({ where: { 
+        or: [
+            {
+                tipeGuide: {
+                    contains: 'inter rapidisimo'
+                }
+            }
+
+        ]
+    } }), 'POST');
+    getWhatsapp = getWhatsapp.data;
+    for( let row of getWhatsapp ){
+        let infoGuia = await LogicInter( row.numberGuide );
+        console.log("****487", infoGuia );
+        let  ds = {
+            guia: row.numberGuide,
+            id: row.numberGuide,
+            estado: infoGuia.TrazaGuia.DescripcionEstadoGuia === 'Archivada' ? 'Entregado' : infoGuia.TrazaGuia.DescripcionEstadoGuia,
+            transport: "Inter Rapidisimo",
+            tipoProducto: infoGuia.Guia.NombreTipoEnvio,
+            formaPago: "CREDITO",
+            pdfEntrega: ""
+        };
+        updateGuia( ds )
+    }
+}
+
+async function updateGuia( row ){
+    await getURL('whatsapphistorial/escuchaEstados', JSON.stringify( { data:row } ), 'POST');
+}
+
+async function LogicInter( idGuia ){
+    return new Promise( async ( resolve ) =>{
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+
+        // Habilitar la interceptación de solicitudes
+        await page.setRequestInterception(true);
+
+        // Agregar un manejador para escuchar solicitudes
+        page.on('request', (request) => {
+            // Imprimir la URL de la solicitud
+            console.log('Request URL:', request.url());
+            
+            // Continuar la solicitud
+            request.continue();
+        });
+
+        page.on('response', async (response) => {
+            // Imprimir la URL de la respuesta
+            console.log('Response URL:', response.url());
+            if( response.url() === 'https://www3.interrapidisimo.com/ApiServInter/api/Mensajeria/ObtenerRastreoGuiasClientePost' ){
+                // Obtener el contenido de la respuesta en texto
+            const responseBody = await response.text();
+            //console.log('Respuesta de la ruta:', JSON.parse( responseBody ));
+            resolve( JSON.parse( responseBody ) )
+            }
+        });
+
+        // Navegar a la página que deseas observar
+        await page.goto('https://www3.interrapidisimo.com:8082/SiguetuEnvio/shipment/'+idGuia);
+
+        // Realizar otras operaciones en la página, como esperar a que cargue contenido adicional
+
+        // Cerrar el navegador cuando hayas terminado
+        await browser.close();
+    });
+}
+
+
 Inicial();
+

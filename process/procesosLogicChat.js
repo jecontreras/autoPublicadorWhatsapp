@@ -115,6 +115,7 @@ Procedures.init = async(msx, numero)=>{
         } ]
         else return [ { data: validateMsx.respuesta } ];
     }
+    return []
 
 }
 getNumeroInfo = async( numero )=>{
