@@ -2,7 +2,7 @@ const { Client, LegacySessionAuth, LocalAuth, MessageMedia, Buttons  } = require
 const qrcode = require('qrcode-terminal');
 const _process = require('./process/procesosLogicChat.js');
 const io = require('socket.io-client');
-const sailsServerURL = 'http://localhost:1335'; // Reemplaza con la URL de tu servidor Sails.js
+const sailsServerURL = 'https://whatsappapiweb.herokuapp.com'; // Reemplaza con la URL de tu servidor Sails.js
 const puppeteer = require('puppeteer');
 
 const fs = require('fs');
@@ -192,7 +192,7 @@ client.on("ready", async () => {
     if( vandera === false ){
         vandera = true;
         validadorChat();
-        //getGuideInter();
+        getGuideInter();
         //await ProcesoEn( row );s
     }
 });
@@ -346,8 +346,8 @@ async function getURL(url, bodys, metodo) {
     return new Promise(resolve => {
         var options = {
             'method': metodo,
-            //'url': `https://whatsappapiweb.herokuapp.com/${url}`,
-            'url': `http://localhost:1335/${url}`,
+            'url': `https://whatsappapiweb.herokuapp.com/${url}`,
+            //'url': `http://localhost:1335/${url}`,
             'headers': {
                 'Connection': 'keep-alive',
                 'Accept': 'application/json, text/plain, */*',
@@ -484,18 +484,21 @@ async function getGuideInter(){
     } }), 'POST');
     getWhatsapp = getWhatsapp.data;
     for( let row of getWhatsapp ){
-        let infoGuia = await LogicInter( row.numberGuide );
-        console.log("****487", infoGuia );
-        let  ds = {
-            guia: row.numberGuide,
-            id: row.numberGuide,
-            estado: infoGuia.TrazaGuia.DescripcionEstadoGuia === 'Archivada' ? 'Entregado' : infoGuia.TrazaGuia.DescripcionEstadoGuia,
-            transport: "Inter Rapidisimo",
-            tipoProducto: infoGuia.Guia.NombreTipoEnvio,
-            formaPago: "CREDITO",
-            pdfEntrega: ""
-        };
-        updateGuia( ds )
+        try{
+            let infoGuia = await LogicInter( row.numberGuide );
+            console.log("****487", infoGuia );
+            let  ds = {
+                guia: row.numberGuide,
+                id: row.numberGuide,
+                estado: infoGuia.TrazaGuia.DescripcionEstadoGuia === 'Archivada' ? 'Entregado' : infoGuia.TrazaGuia.DescripcionEstadoGuia,
+                transport: "Inter Rapidisimo",
+                tipoProducto: infoGuia.Guia.NombreTipoEnvio,
+                formaPago: "CREDITO",
+                pdfEntrega: ""
+            };
+            updateGuia( ds )
+        }
+        catch(err){}
     }
 }
 
@@ -505,39 +508,42 @@ async function updateGuia( row ){
 
 async function LogicInter( idGuia ){
     return new Promise( async ( resolve ) =>{
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
+        try{ 
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
 
-        // Habilitar la interceptación de solicitudes
-        await page.setRequestInterception(true);
+            // Habilitar la interceptación de solicitudes
+            await page.setRequestInterception(true);
 
-        // Agregar un manejador para escuchar solicitudes
-        page.on('request', (request) => {
-            // Imprimir la URL de la solicitud
-            console.log('Request URL:', request.url());
-            
-            // Continuar la solicitud
-            request.continue();
-        });
+            // Agregar un manejador para escuchar solicitudes
+            page.on('request', (request) => {
+                // Imprimir la URL de la solicitud
+                console.log('Request URL:', request.url());
+                
+                // Continuar la solicitud
+                request.continue();
+            });
 
-        page.on('response', async (response) => {
-            // Imprimir la URL de la respuesta
-            console.log('Response URL:', response.url());
-            if( response.url() === 'https://www3.interrapidisimo.com/ApiServInter/api/Mensajeria/ObtenerRastreoGuiasClientePost' ){
-                // Obtener el contenido de la respuesta en texto
-            const responseBody = await response.text();
-            //console.log('Respuesta de la ruta:', JSON.parse( responseBody ));
-            resolve( JSON.parse( responseBody ) )
-            }
-        });
+            page.on('response', async (response) => {
+                // Imprimir la URL de la respuesta
+                console.log('Response URL:', response.url());
+                if( response.url() === 'https://www3.interrapidisimo.com/ApiServInter/api/Mensajeria/ObtenerRastreoGuiasClientePost' ){
+                    // Obtener el contenido de la respuesta en texto
+                const responseBody = await response.text();
+                //console.log('Respuesta de la ruta:', JSON.parse( responseBody ));
+                resolve( JSON.parse( responseBody ) )
+                }
+            });
 
-        // Navegar a la página que deseas observar
-        await page.goto('https://www3.interrapidisimo.com:8082/SiguetuEnvio/shipment/'+idGuia);
+            // Navegar a la página que deseas observar
+            await page.goto('https://www3.interrapidisimo.com:8082/SiguetuEnvio/shipment/'+idGuia);
 
-        // Realizar otras operaciones en la página, como esperar a que cargue contenido adicional
+            // Realizar otras operaciones en la página, como esperar a que cargue contenido adicional
 
-        // Cerrar el navegador cuando hayas terminado
-        await browser.close();
+            // Cerrar el navegador cuando hayas terminado
+            await browser.close();
+        }
+        catch(err){}
     });
 }
 
