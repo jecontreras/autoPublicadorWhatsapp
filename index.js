@@ -11,7 +11,7 @@ let countRequest = 0;
 let page;
 let ipPc = 16;
 let getUser = {};
-
+const port = process.env.PORT || 3000;
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
 
