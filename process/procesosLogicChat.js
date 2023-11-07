@@ -123,7 +123,7 @@ Procedures.init = async(msx, numero, numeroFrom )=>{
       if( validator === false ){
           validateMsx = Boolean();
           validateMsx = await Procedures.ContienePalabra( "vi esto en Facebook", dataLogic.listLogic );
-          console.log("******VALIDANDO TODO********", validateMsx)
+          //console.log("******VALIDANDO TODO********", validateMsx)
           if( validateMsx !== false ) {
               if( validateMsx.urlMedios ) return [ { 
                   indicador: '04',
@@ -145,7 +145,7 @@ Procedures.validarInicial = async( numeroFrom, numeroTo)=>{
       from: numeroFrom
     }
   }, 'post' );
-  console.log("***148", resultado )
+  //console.log("***148", resultado )
   resultado = resultado.data[0];
   if( resultado ) return true;
   return false;

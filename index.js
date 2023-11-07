@@ -71,7 +71,7 @@ client.on('message', async (message) => {
     if( !message.author ) {
         senMsxRecord( message );
         let result = await _process.init(message.body, message.to, message.from);
-        console.log("***63", result)
+        //console.log("***63", result)
         if( !result ) return true;
         if( result.length ) {
             for( let row of result ) {
