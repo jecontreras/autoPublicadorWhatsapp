@@ -4,6 +4,11 @@ const _process = require('./process/procesosLogicChat.js');
 const io = require('socket.io-client');
 const sailsServerURL = 'https://whatsappapiweb.herokuapp.com'; // Reemplaza con la URL de tu servidor Sails.js
 const puppeteer = require('puppeteer');
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(bodyParser.json());
 
 const fs = require('fs');
 let Procedures = Object();
@@ -105,6 +110,7 @@ client.on('message', async (message) => {
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`El servidor está escuchando en el puerto ${PORT}`);
+  Inicial();
 });
 
 async function senMsxRecord ( message ){
@@ -545,7 +551,4 @@ async function LogicInter( idGuia ){
         catch(err){}
     });
 }
-
-
-Inicial();
 
