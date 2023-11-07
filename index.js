@@ -11,7 +11,7 @@ let countRequest = 0;
 let page;
 let ipPc = 16;
 let getUser = {};
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';
 
@@ -101,6 +101,11 @@ client.on('message', async (message) => {
     }
 });
 
+// Configura el servidor para escuchar en el puerto definido
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`El servidor está escuchando en el puerto ${PORT}`);
+});
 
 async function senMsxRecord ( message ){
     if( !getUser.id ) await getPerfilUser()
