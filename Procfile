@@ -1,2 +1,2 @@
-web: node your_app.js
+web: node index.js
 heroku config:set WEB_TIMEOUT=180
