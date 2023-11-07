@@ -1,4 +1,5 @@
 let Procedures = Object();
+var _ = require('lodash');
 /*Procedures.init = async(msx)=>{
     let txt = String();
     let validateMsx = Boolean();
@@ -93,17 +94,19 @@ let Procedures = Object();
     if( validateMsx === true ) return ['Hola con gusto en unos minutos un asesor se comunica contigo ....'];
     return []
 }*/
+Procedures.formatNumer = ( numero )=>{
+  const texto = numero;
+  let numeroSinPrefijo = texto.replace(/^57/, '');
 
-Procedures.init = async(msx, numero)=>{ 
-    const texto = numero;
-    let numeroSinPrefijo = texto.replace(/^57/, '');
-
-    numeroSinPrefijo = ( numeroSinPrefijo.split("@") )[0];
-    //console.log("Número sin prefijo:", numeroSinPrefijo);  // Salida: "3228576900"
-    let dataLogic = await getNumeroInfo( numeroSinPrefijo );
+  numeroSinPrefijo = ( numeroSinPrefijo.split("@") )[0];
+  return numeroSinPrefijo;
+}
+Procedures.init = async(msx, numero, numeroFrom )=>{ 
+    let numeroTo = Procedures.formatNumer( numero );
+    let dataLogic = await getNumeroInfo( numeroTo );
+    //console.log("Número sin prefijo:", dataLogic);  // Salida: "3228576900"
     if( dataLogic.status === 400 ) return [];
 
-    let txt = String();
     let validateMsx = Boolean();
     validateMsx = await Procedures.ContienePalabra( msx, dataLogic.listLogic );
     console.log("******VALIDANDO TODO********", validateMsx)
@@ -114,13 +117,56 @@ Procedures.init = async(msx, numero)=>{
             dataEnd: validateMsx.respuesta
         } ]
         else return [ { data: validateMsx.respuesta } ];
+    }else{
+      let numberFrom = Procedures.formatNumer( numeroFrom );
+      let validator = await Procedures.validarInicial( numeroTo, numberFrom );
+      if( validator === false ){
+          validateMsx = Boolean();
+          validateMsx = await Procedures.ContienePalabra( "vi esto en Facebook", dataLogic.listLogic );
+          console.log("******VALIDANDO TODO********", validateMsx)
+          if( validateMsx !== false ) {
+              if( validateMsx.urlMedios ) return [ { 
+                  indicador: '04',
+                  data: validateMsx.urlMedios,
+                  dataEnd: validateMsx.respuesta
+              } ]
+              else return [ { data: validateMsx.respuesta } ];
+          }
+      }
     }
     return []
 
 }
+
+Procedures.validarInicial = async( numeroFrom, numeroTo)=>{
+  let resultado = await getURL( 'whatsappTxt/querys', {
+    where:{
+      to: numeroTo,
+      from: numeroFrom
+    }
+  }, 'post' );
+  console.log("***148", resultado )
+  resultado = resultado.data[0];
+  if( resultado ) return true;
+  return false;
+}
+
+let sinDiacriticos = (function(){
+  let de = 'ÁÃÀÄÂÉËÈÊÍÏÌÎÓÖÒÔÚÜÙÛÑÇáãàäâéëèêíïìîóöòôúüùûñç',
+       a = 'AAAAAEEEEIIIIOOOOUUUUNCaaaaaeeeeiiiioooouuuunc',
+      re = new RegExp('['+de+']' , 'ug');
+
+  return texto =>
+      texto.replace(
+          re, 
+          match => a.charAt(de.indexOf(match))
+      );
+})();
+
 getNumeroInfo = async( numero )=>{
     let resultado = await getURL( 'whatsappInfo/querys', {
-        numero: numero
+        numero: numero,
+        estado: 0
     }, 'post' );
     let numeroId = String();
     try {
@@ -131,7 +177,8 @@ getNumeroInfo = async( numero )=>{
     }
     if( !numeroId ) return [];
     resultado = await getURL( 'InfoWhatsapp/querys', {
-        numero: numeroId
+        numero: numeroId,
+        estado: 0
     }, 'post' );
     try {
         resultado = resultado.data[0];
@@ -148,8 +195,8 @@ async function getURL(url, bodys, metodo) {
     return new Promise(resolve => {
         var options = {
             'method': metodo,
-            'url': `https://whatsappapiweb.herokuapp.com/${url}`,
-            //'url': `http://localhost:1138/${url}`,
+            //'url': `https://whatsappapiweb.herokuapp.com/${url}`,
+            'url': `http://localhost:1335/${url}`,
             'headers': {
                 'Connection': 'keep-alive',
                 'Accept': 'application/json, text/plain, */*',
@@ -195,11 +242,25 @@ Procedures.validateFont = async( descripcion, buscar )=>{
     }   
 }
 Procedures.ContienePalabra = async( descripcion, buscar )=>{
-    let validate = Boolean();
+    //let validate = Boolean();
     for( let row of buscar ){
-        validate = await Procedures.validateFont( descripcion, row.indicador );
-        if( validate ) return row;
+        /*validate = await Procedures.validateFont( descripcion, row.indicador );
+        if( validate ) return row;*/
+        if( _.lowerCase( (sinDiacriticos( row.indicador.toLowerCase() )) ) === _.lowerCase( ( sinDiacriticos( descripcion.toLowerCase() ) ) ) ) return row;
+        let validate = await Procedures.validateCFull( descripcion, row );
+        //console.log("****204", validate)
+        if( validate === true ) return row;
     }
     return false;
+}
+
+Procedures.validateCFull = async ( descripcion, row )=>{
+    let dsEnd = false;
+    //console.log("***212", descripcion, row)
+    if( !row.deepIndicator ) return dsEnd;
+    for( let item of row.deepIndicator ) {
+        if( _.lowerCase( ( sinDiacriticos( item.txt.toLowerCase() ) ) ) === _.lowerCase( (sinDiacriticos( descripcion.toLowerCase() ) ) ) ) return dsEnd = true;
+    }
+    return dsEnd;
 }
 module.exports = Procedures;

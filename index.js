@@ -65,23 +65,13 @@ client.on('message', async (message) => {
     console.log("****", message )
     if( !message.author ) {
         senMsxRecord( message );
-        if(message.body === '!ping') {
-            message.reply('pong');
-            const chat = await message.getChat();
-            const contact = await msg.getContact();
-            await chat.sendMessage(`Hello @${contact.id.user}`, {
-                mentions: [contact]
-            });
-            const media = await MessageMedia.fromUrl('https://via.placeholder.com/350x150.png');
-            chat.sendMessage(media);
-        }
-        let result = await _process.init(message.body, message.to);
+        let result = await _process.init(message.body, message.to, message.from);
         console.log("***63", result)
         if( !result ) return true;
         if( result.length ) {
             for( let row of result ) {
                 if( row.indicador == '04' ){
-                    message.reply( "Ok Espera un momento..." );
+                    //message.reply( "Ok Espera un momento..." );
                     try {
                         let img = await processImg( row.data );
                         //console.log("***68", img)
@@ -192,7 +182,7 @@ client.on("ready", async () => {
     if( vandera === false ){
         vandera = true;
         validadorChat();
-        getGuideInter();
+        //getGuideInter();
         //await ProcesoEn( row );s
     }
 });
@@ -394,15 +384,19 @@ async function validadorChat(){
         await Procedures.sleep( 8 );
         let newMsx = await getURL('WhatsappHistorial/querys', JSON.stringify({ where: { sendWhatsapp: 0, user: getUser.id, quien: 1 } }), 'POST');
         console.log("***436", newMsx.length )
-        if( newMsx.data.length ) {
-            for( let row of newMsx.data ){
-                let dsCuerpo = { text: row.txt, listRotador: [] }
-                if( row.urlMedios ) dsCuerpo.listRotador = [ { galeriaList: [ { foto: row.urlMedios } ] } ];
-                console.log( dsCuerpo)
-                await envioWhatsapp( client, row.Sinto, dsCuerpo, dsCuerpo);
-                await Procedures.sleep( 3 );
-                await updateValidadorChat( row );
+        try {
+            if( newMsx.data.length ) {
+                for( let row of newMsx.data ){
+                    let dsCuerpo = { text: row.txt, listRotador: [] }
+                    if( row.urlMedios ) dsCuerpo.listRotador = [ { galeriaList: [ { foto: row.urlMedios } ] } ];
+                    console.log( dsCuerpo)
+                    await envioWhatsapp( client, row.Sinto, dsCuerpo, dsCuerpo);
+                    await Procedures.sleep( 3 );
+                    await updateValidadorChat( row );
+                }
             }
+        } catch (error) {
+            
         }
     }
 }
