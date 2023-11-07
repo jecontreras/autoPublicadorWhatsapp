@@ -195,8 +195,8 @@ async function getURL(url, bodys, metodo) {
     return new Promise(resolve => {
         var options = {
             'method': metodo,
-            //'url': `https://whatsappapiweb.herokuapp.com/${url}`,
-            'url': `http://localhost:1335/${url}`,
+            'url': `https://whatsappapiweb.herokuapp.com/${url}`,
+            //'url': `http://localhost:1335/${url}`,
             'headers': {
                 'Connection': 'keep-alive',
                 'Accept': 'application/json, text/plain, */*',
