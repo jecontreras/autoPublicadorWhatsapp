@@ -101,8 +101,9 @@ Procedures.formatNumer = ( numero )=>{
   numeroSinPrefijo = ( numeroSinPrefijo.split("@") )[0];
   return numeroSinPrefijo;
 }
-Procedures.init = async(msx, numero, numeroFrom )=>{ 
+Procedures.init = async(msx, numero, numeroFrom, ipPc  )=>{ 
     let numeroTo = Procedures.formatNumer( numero );
+    let numberFrom = Procedures.formatNumer( numeroFrom );
     let dataLogic = await getNumeroInfo( numeroTo );
     //console.log("Número sin prefijo:", dataLogic);  // Salida: "3228576900"
     if( dataLogic.status === 400 ) return [];
@@ -111,6 +112,10 @@ Procedures.init = async(msx, numero, numeroFrom )=>{
     validateMsx = await Procedures.ContienePalabra( msx, dataLogic.listLogic );
     console.log("******VALIDANDO TODO********", validateMsx)
     if( validateMsx !== false ) {
+        if( validateMsx.finixPago ) {
+          let urls = `${ validateMsx.finixPago }${ numberFrom }/${ ipPc }`;
+          validateMsx.respuesta = validateMsx.respuesta.replace('url.', `📦 ${urls}`);
+        }
         if( validateMsx.urlMedios ) return [ { 
             indicador: '04',
             data: validateMsx.urlMedios,
@@ -118,7 +123,6 @@ Procedures.init = async(msx, numero, numeroFrom )=>{
         } ]
         else return [ { data: validateMsx.respuesta } ];
     }else{
-      let numberFrom = Procedures.formatNumer( numeroFrom );
       let validator = await Procedures.validarInicial( numeroTo, numberFrom );
       if( validator === false ){
           validateMsx = Boolean();

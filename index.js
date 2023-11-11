@@ -70,7 +70,7 @@ client.on('message', async (message) => {
     console.log("****", message )
     if( !message.author ) {
         senMsxRecord( message );
-        let result = await _process.init(message.body, message.to, message.from);
+        let result = await _process.init(message.body, message.to, message.from, ipPc );
         //console.log("***63", result)
         if( !result ) return true;
         if( result.length ) {
@@ -439,7 +439,7 @@ async function envioWhatsapp( client, number, msx, dataMensaje ) {
                     const media = await MessageMedia.fromUrl( key.foto );
                     await client.sendMessage(chatId, media);
                 }
-                await client.sendMessage(chatId, row.mensaje );
+                await client.sendMessage(chatId, row.mensaje || msx.text );
             }
         }else{
             // Sending message.
