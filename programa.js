@@ -9,7 +9,7 @@ const fs = require('fs');
 const { addConsoleHandler } = require('selenium-webdriver/lib/logging');
 let Procedures = Object();
 let page;
-let ipPc = 16;
+let ipPc = 8;
 
 // Path where the session data will be stored
 const SESSION_FILE_PATH = './session.json';

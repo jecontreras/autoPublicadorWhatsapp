@@ -17,7 +17,7 @@
     "request": "^2.88.2",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "socket.io-client": "^4.7.2",
-    "whatsapp-web.js": "^1.22.2-alpha.1"
+    "whatsapp-web.js": "^1.23.1-alpha.5"
   },
   "scripts": {
     "start": "node index.js",
